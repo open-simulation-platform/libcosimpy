@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "libcosimpy"
+dynamic = ["version"]
+authors = [
+    { name = "Magnus Steinstø", email = "magnus.steinsto@dnv.com" }
+]
+description = "Python wrapper for the libcosim library"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux"
+]
+[project.urls]
+"Homepage" = "https://github.com/open-simulation-platform/libcosimpy"
+
+# Hatch configurations
+[tool.hatch.version]
+path = "src/libcosimpy/__about__.py"
+
+[tool.hatch.build]
+exclude = ["tests"]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
+dependencies = [
+    "conan==1.59.0",
+    "patchelf>=0.17.2; platform_system == 'Linux'"
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+"build/libcosimc" = "src/libcosimpy/libcosimc"
+
+
+
+
+

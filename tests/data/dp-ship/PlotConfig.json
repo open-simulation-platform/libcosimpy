@@ -1,0 +1,46 @@
+{
+  "plots": [
+    {
+      "label": "Position and reference X",
+      "plotType": "trend",
+      "variables": [
+        {
+          "simulator": "Reference Generator",
+          "variable": "x_ref"
+        },
+        {
+          "simulator": "Ship",
+          "variable": "q[1]"
+        }
+      ]
+    },
+    {
+      "label": "Position and reference Y",
+      "plotType": "trend",
+      "variables": [
+        {
+          "simulator": "Reference Generator",
+          "variable": "y_ref"
+        },
+        {
+          "simulator": "Ship",
+          "variable": "q[2]"
+        }
+      ]
+    },
+    {
+      "label": "Vessel position XY",
+      "plotType": "scatter",
+      "variables": [
+        {
+          "simulator": "Ship",
+          "variable": "q[1]"
+        },
+        {
+          "simulator": "Ship",
+          "variable": "q[2]"
+        }
+      ]
+    }
+  ]
+}

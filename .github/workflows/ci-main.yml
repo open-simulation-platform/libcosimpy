@@ -1,0 +1,73 @@
+name: libcosimpy CI conan
+
+# This workflow is triggered on pushes to the repository.
+on: [push, workflow_dispatch]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ 'windows-latest', 'ubuntu-latest' ]
+        python-version: [ '3.9', '3.10', '3.11' ]
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 'Run test'
+        run: |
+          pip install .
+          pip install pytest==7.2.2
+          pytest .
+  build:
+    name: build
+    needs:
+      - test
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ 'windows-latest', 'ubuntu-latest' ]
+        python-version: [ '3.9', '3.10', '3.11' ]
+    timeout-minutes: 35
+    env:
+      CONAN_REVISIONS_ENABLED: 1
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install build and twine
+        run: pip install build twine
+      - name: Run build
+        run: python -m build
+      - name: Run twine check
+        run: twin check --strict dist/*
+      - uses: actions/upload-artifact@v3
+        name: source
+        with:
+          path: ./dist/*.tar.gz
+      - uses: actions/upload-artifact@v3
+        name: wheels
+        with:
+          path: ./dist/*.whl
+
+  #  publish:
+  #   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+  #   needs:
+  #     - build
+  #   runs-on: ubuntu-latest
+  #   environment: pypi
+  #   steps:
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: wheels
+  #         path: ./dist/
+  #     - uses: pypa/gh-action-pypi-publish@v1.5.2
+  #       with:
+  #         user: __token__
+  #         password: ${{ secrets.PYPI_API_TOKEN }}
+
