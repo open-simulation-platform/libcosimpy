@@ -1,11 +1,12 @@
-name: libcosimpy CI conan
+name: libcosimpy CI
 
 # This workflow is triggered on pushes to the repository.
-on: [push, workflow_dispatch]
+on: [push, workflow_dispatch ]
 
 jobs:
   test:
     name: Test on ${{ matrix.platform }}
+    runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
