@@ -5,7 +5,7 @@ on: [push, workflow_dispatch ]
 
 jobs:
   test:
-    name: Test on ${{ matrix.platform }}
+    name: test
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -46,29 +46,33 @@ jobs:
       - name: Run build
         run: python -m build
       - name: Run twine check
-        run: twin check --strict dist/*
+        run: twine check --strict dist/*
       - uses: actions/upload-artifact@v3
-        name: source
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+        name: Upload artifact (source)
         with:
+          name: source
           path: ./dist/*.tar.gz
       - uses: actions/upload-artifact@v3
-        name: wheels
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+        name: Upload artifact (wheels)
         with:
+          name: wheels
           path: ./dist/*.whl
 
-  #  publish:
-  #   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
-  #   needs:
-  #     - build
-  #   runs-on: ubuntu-latest
-  #   environment: pypi
-  #   steps:
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: wheels
-  #         path: ./dist/
-  #     - uses: pypa/gh-action-pypi-publish@v1.5.2
-  #       with:
-  #         user: __token__
-  #         password: ${{ secrets.PYPI_API_TOKEN }}
+  publish:
+   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+   needs:
+     - build
+   runs-on: ubuntu-latest
+   environment: pypi
+   steps:
+     - uses: actions/download-artifact@v3
+       with:
+         name: wheels
+         path: ./dist/
+     - uses: pypa/gh-action-pypi-publish@v1.5.2
+       with:
+         user: __token__
+         password: ${{ secrets.PYPI_API_TOKEN }}
 
