@@ -46,7 +46,7 @@ jobs:
       - name: Run build
         run: python -m build
       - name: Run twine check
-        run: twin check --strict dist/*
+        run: twine check --strict dist/*
       - uses: actions/upload-artifact@v3
         name: source
         with:
