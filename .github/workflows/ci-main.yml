@@ -48,10 +48,12 @@ jobs:
       - name: Run twine check
         run: twine check --strict dist/*
       - uses: actions/upload-artifact@v3
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         name: source
         with:
           path: ./dist/*.tar.gz
       - uses: actions/upload-artifact@v3
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         name: wheels
         with:
           path: ./dist/*.whl
