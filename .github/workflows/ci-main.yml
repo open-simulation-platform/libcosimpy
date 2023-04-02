@@ -51,26 +51,28 @@ jobs:
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         name: source
         with:
+          name: source
           path: ./dist/*.tar.gz
       - uses: actions/upload-artifact@v3
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         name: wheels
         with:
+          name: wheels
           path: ./dist/*.whl
 
-  #  publish:
-  #   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
-  #   needs:
-  #     - build
-  #   runs-on: ubuntu-latest
-  #   environment: pypi
-  #   steps:
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: wheels
-  #         path: ./dist/
-  #     - uses: pypa/gh-action-pypi-publish@v1.5.2
-  #       with:
-  #         user: __token__
-  #         password: ${{ secrets.PYPI_API_TOKEN }}
+    publish:
+     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+     needs:
+       - build
+     runs-on: ubuntu-latest
+     environment: pypi
+     steps:
+       - uses: actions/download-artifact@v3
+         with:
+           name: wheels
+           path: ./dist/
+       - uses: pypa/gh-action-pypi-publish@v1.5.2
+         with:
+           user: __token__
+           password: ${{ secrets.PYPI_API_TOKEN }}
 
