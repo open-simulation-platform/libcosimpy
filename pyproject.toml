@@ -28,7 +28,7 @@ classifiers = [
 path = "src/libcosimpy/__about__.py"
 
 [tool.hatch.build]
-exclude = ["tests"]
+exclude = ["tests", ".github"]
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 dependencies = [
