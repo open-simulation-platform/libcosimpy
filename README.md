@@ -20,21 +20,29 @@ pip install .
 
 Import `CosimExecution` from `libcosimpy`
 
-```from libcosimpy.CosimExecution import CosimExecution```
+```python
+from libcosimpy.CosimExecution import CosimExecution
+```
 
 #### Empty execution object
 
-```execution = CosimExecution.from_step_size(step_size=1e3)```
+```python
+execution = CosimExecution.from_step_size(step_size=1e3)
+```
 
 With a 0.01s fixed time step
 
 #### From OSP config
 
-```execution = CosimExecution.from_osp_config_file(osp_path=f'[PATH_TO_OSP_DIRECTORY]')```
+```python
+execution = CosimExecution.from_osp_config_file(osp_path=f'[PATH_TO_OSP_DIRECTORY]')
+```
 
 #### From SSP config
 
-```execution = CosimExecution.from_ssp_file(ssp_path=f'[PATH_TO_SSP_DIRECTORY]')```
+```python
+execution = CosimExecution.from_ssp_file(ssp_path=f'[PATH_TO_SSP_DIRECTORY]')
+```
 
 ## Add slave
 
@@ -42,11 +50,13 @@ FMUs can be added manually to execution. OSP and SSP config executions will impo
 
 Import `CosimLocalSlave` from `libcosimpy`
 
-```from libcosimpy.CosimSlave import CosimLocalSlave```
+```python
+from libcosimpy.CosimSlave import CosimLocalSlave
+```
 
 Add slave to existing execution 
 
-```
+```python
 local_slave = CosimLocalSlave(fmu_path=f'[PATH_WITH_FILENAME_TO_FMU]', instance_name='[SOME_UNIQUE_NAME]')
 slave_index = execution.add_local_slave(local_slave=local_slave)
 ```
@@ -57,27 +67,37 @@ Slave index is used for future referencing to the model
 
 Simulations can either be run continiously for a duration
 
-```execution.simulate_until(target_time=10e9)```
+```python
+execution.simulate_until(target_time=10e9)
+```
 
 To simulate for 10s
 
 Or stepped manually
 
-```execution.step()```
+```python
+execution.step()
+```
 
 With option for stepping multiple steps at once
 
-```execution.step(step_count=10)```
+```python
+execution.step(step_count=10)
+```
 
 ## Finding slave and variable indices
 
 List of slave indices and corresponding indices can be fetched from execution
 
-```slave_infos = list(execution.slave_infos())```
+```python
+slave_infos = list(execution.slave_infos())
+```
 
 List of model variables and corresponding indices can be fetched
 
-```variables = execution.slave_variables(slave_index=slave_index)```
+```python
+variables = execution.slave_variables(slave_index=slave_index)
+```
 
 The indices can also be found by unzipping the FMU-file and inspecting the `modelDescription.xml` file 
 
@@ -85,11 +105,13 @@ The indices can also be found by unzipping the FMU-file and inspecting the `mode
 
 Import `CosimObserver` from `libcosimpy`
 
-```from libcosimpy.CosimObserver import CosimObserver```
+```python
+from libcosimpy.CosimObserver import CosimObserver
+```
 
 Observers can be used to retrieve values as Python list
 
-```
+```python
 observer = CosimObserver.create_last_value()
 execution.add_observer(observer=observer)
 
@@ -106,11 +128,13 @@ Time series and file export observers are also supported
 
 Import `CosimManipulator` from `libcosimpy`
 
-```from libcosimpy.CosimManipulator import CosimManipulator```
-
-Manipualtors are used to override values
-
+```python
+from libcosimpy.CosimManipulator import CosimManipulator
 ```
+
+Manipulators are used to override values
+
+```python
 manipulator = CosimManipulator.create_override()
 execution.add_manipulator(manipulator=manipulator)
 
