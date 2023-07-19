@@ -6,11 +6,14 @@ build-backend = "hatchling.build"
 name = "libcosimpy"
 dynamic = ["version"]
 authors = [
-    { name = "Magnus Steinstø", email = "magnus.steinsto@dnv.com" }
+    { name = "Magnus Steinstø", email = "magnus.steinsto@dnv.com" },
+]
+maintainers = [
+    { name = "Hee Jong Park", email = "hee.jong.park@dnv.com"}
 ]
 description = "Python wrapper for the libcosim library"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8, <3.12"
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.9",

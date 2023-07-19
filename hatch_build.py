@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
@@ -8,7 +8,7 @@ import platform
 
 
 class WheelHook(BuildHookInterface):
-    def initialize(self, version: str, build_data: dict[str, Any]) -> None:
+    def initialize(self, version: str, build_data: Dict[str, Any]) -> None:
         super().initialize(version, build_data)
         build_data["infer_tag"] = True
         build_data["pure_python"] = False
