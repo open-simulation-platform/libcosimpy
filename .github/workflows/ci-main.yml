@@ -1,7 +1,7 @@
 name: libcosimpy CI
 
 # This workflow is triggered on pushes to the repository.
-on: [push, workflow_dispatch ]
+on: [push, workflow_dispatch]
 
 jobs:
   test:
@@ -23,56 +23,75 @@ jobs:
           pip install .
           pip install pytest==7.2.2
           pytest .
-  build:
-    name: build
+
+  build_wheels:
+    name: Build wheels
     needs:
       - test
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.platform.image }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [ 'windows-latest', 'ubuntu-latest' ]
-        python-version: [ '3.8', '3.9', '3.10', '3.11', '3.12' ]
+        platform:
+          - image: 'windows-latest'
+            name: 'windows'
+          - image: 'ubuntu-latest'
+            name: 'linux'
+        python-version: [ 'cp38', 'cp39', 'cp310', 'cp311', 'cp312' ]
     timeout-minutes: 35
     env:
       CONAN_REVISIONS_ENABLED: 1
+      TARGET_ID: libcosimpy-${{ github.ref_name }}-${{ matrix.platform.name }}-${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install build and twine
-        run: pip install build twine
-      - name: Upgrade pkginfo
-        run: pip install --upgrade pkginfo>=1.10.0
-      - name: Run build
-        run: python -m build
-      - name: Run twine check
-        run: twine check --strict dist/*
-      - uses: actions/upload-artifact@v3
-        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
-        name: Upload artifact (source)
-        with:
-          name: source
-          path: ./dist/*.tar.gz
-      - uses: actions/upload-artifact@v3
+          python-version: 3.11
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.19.2
+        env:
+          CIBW_BUILD: "${{ matrix.python-version }}-win_amd64 ${{ matrix.python-version }}-manylinux_x86_64"
+      - uses: actions/upload-artifact@v4
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         name: Upload artifact (wheels)
         with:
-          name: wheels
-          path: ./dist/*.whl
+          name: ${{ env.TARGET_ID }}-wheel
+          path: ./wheelhouse/*.whl
+
+  build_source:
+    name: Build source
+    needs:
+      - test
+    runs-on: 'ubuntu-latest'
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install build
+        run: pip install build
+      - name: Build source
+        run: python -m build --sdist
+      - uses: actions/upload-artifact@v4
+        name: Upload artifact (source)
+        with:
+          name: libcosimpy-${{ github.ref_name }}-source
+          path: ./dist/*.tar.gz
 
   publish:
    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
    needs:
-     - build
+     - build_wheels
+     - build_source
    runs-on: ubuntu-latest
-   environment: pypi
    steps:
-     - uses: actions/download-artifact@v3
+     - uses: actions/download-artifact@v4
        with:
-         name: wheels
+         pattern: "*-wheel"
+         merge-multiple: true
          path: ./dist/
+     - name: Twine check
+       run: | 
+          pip install twine
+          twine check --strict ./dist/*
      - uses: pypa/gh-action-pypi-publish@v1.9.0
        with:
          user: __token__

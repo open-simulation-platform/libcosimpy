@@ -15,10 +15,16 @@ class WheelHook(BuildHookInterface):
         system_os = platform.system()
         conan, _, _ = Conan.factory()
         conan.config_set("general.revisions_enabled", "True")
-        conan.remote_add(remote_name="osp", url="https://osp.jfrog.io/artifactory/api/conan/conan-local", force=True,
-                         insert=0)
-        conan.install(path="conan",
-                      lockfile='conan/conan-linux64.lock' if system_os == "Linux" else 'conan/conan-win64.lock',
-                      install_folder="build")
+        conan.remote_add(
+            remote_name="osp",
+            url="https://osp.jfrog.io/artifactory/api/conan/conan-local",
+            force=True,
+            insert=0,
+        )
+        conan.install(
+            path="conan",
+            install_folder="build",
+            lockfile='conan/conan-linux64.lock' if system_os == "Linux" else 'conan/conan-win64.lock',
+        )
         if system_os == "Linux":
             os.system("patchelf --set-rpath '$ORIGIN' build/libcosimc/*")
