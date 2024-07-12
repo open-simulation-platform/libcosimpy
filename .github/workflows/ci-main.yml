@@ -43,6 +43,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install build and twine
         run: pip install build twine
+      - name: Upgrade pkginfo
+        run: pip install --upgrade pkginfo>=1.10.0
       - name: Run build
         run: python -m build
       - name: Run twine check
@@ -71,7 +73,7 @@ jobs:
        with:
          name: wheels
          path: ./dist/
-     - uses: pypa/gh-action-pypi-publish@v1.5.2
+     - uses: pypa/gh-action-pypi-publish@v1.9.0
        with:
          user: __token__
          password: ${{ secrets.PYPI_API_TOKEN }}
