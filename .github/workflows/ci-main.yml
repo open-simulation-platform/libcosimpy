@@ -28,20 +28,15 @@ jobs:
     name: Build wheels
     needs:
       - test
-    runs-on: ${{ matrix.platform.image }}
+    runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - image: 'windows-latest'
-            name: 'windows'
-          - image: 'ubuntu-latest'
-            name: 'linux'
+        platform: [ 'windows-latest', 'ubuntu-latest' ]
         python-version: [ 'cp38', 'cp39', 'cp310', 'cp311', 'cp312' ]
     timeout-minutes: 35
     env:
       CONAN_REVISIONS_ENABLED: 1
-      TARGET_ID: libcosimpy-${{ github.ref_name }}-${{ matrix.platform.name }}-${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
@@ -51,11 +46,15 @@ jobs:
         uses: pypa/cibuildwheel@v2.19.2
         env:
           CIBW_BUILD: "${{ matrix.python-version }}-win_amd64 ${{ matrix.python-version }}-manylinux_x86_64"
+      - name: Twine check
+        run: | 
+           pip install twine
+           twine check --strict ./wheelhouse/*
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         name: Upload artifact (wheels)
         with:
-          name: ${{ env.TARGET_ID }}-wheel
+          name: libcosimpy-${{ github.ref_name }}-${{ runner.os }}-${{ matrix.python-version }}-wheel
           path: ./wheelhouse/*.whl
 
   build_source:
@@ -63,14 +62,15 @@ jobs:
     needs:
       - test
     runs-on: 'ubuntu-latest'
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v3
-      - name: Install build
-        run: pip install build
       - name: Build source
-        run: python -m build --sdist
+        run: | 
+          pip install build twine
+          python -m build --sdist
+          twine check --strict ./dist/*
       - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         name: Upload artifact (source)
         with:
           name: libcosimpy-${{ github.ref_name }}-source
@@ -88,10 +88,6 @@ jobs:
          pattern: "*-wheel"
          merge-multiple: true
          path: ./dist/
-     - name: Twine check
-       run: | 
-          pip install twine
-          twine check --strict ./dist/*
      - uses: pypa/gh-action-pypi-publish@v1.9.0
        with:
          user: __token__
