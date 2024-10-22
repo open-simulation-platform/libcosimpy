@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ 'windows-latest', 'ubuntu-latest' ]
-        python-version: [ '3.8', '3.9', '3.10', '3.11', '3.12' ]
+        python-version: [ '3.10', '3.11', '3.12' ]
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ 'windows-latest', 'ubuntu-latest' ]
-        python-version: [ 'cp38', 'cp39', 'cp310', 'cp311', 'cp312' ]
+        python-version: [ 'cp310', 'cp311', 'cp312' ]
     timeout-minutes: 35
     env:
       CONAN_REVISIONS_ENABLED: 1

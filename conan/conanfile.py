@@ -1,13 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
 
 
 class LibCosimpyConanDependency(ConanFile):
     name = "libcosimpy-recipe"
     requires = (
         "libcosimc/0.10.2@osp/stable"
-    )
-    default_options = (
-        "libcosim:proxyfmu=True"
     )
 
     def imports(self):

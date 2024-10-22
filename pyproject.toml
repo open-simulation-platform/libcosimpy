@@ -16,8 +16,6 @@ readme = "README.md"
 requires-python = ">=3.8, <3.13"
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -37,7 +35,7 @@ exclude = ["tests", ".github"]
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 dependencies = [
-    "conan==1.64.0",
+    "conan~=2.8.1",
     "patchelf>=0.17.2; platform_system == 'Linux'"
 ]
 

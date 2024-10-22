@@ -2,7 +2,8 @@ from typing import Any, Dict
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
-from conans.client.conan_api import Conan
+from conan.api.conan_api import ConanAPI
+from conan.cli.cli import Cli
 import os
 import platform
 
@@ -13,18 +14,13 @@ class WheelHook(BuildHookInterface):
         build_data["infer_tag"] = True
         build_data["pure_python"] = False
         system_os = platform.system()
-        conan, _, _ = Conan.factory()
-        conan.config_set("general.revisions_enabled", "True")
-        conan.remote_add(
-            remote_name="osp",
-            url="https://osp.jfrog.io/artifactory/api/conan/conan-local",
-            force=True,
-            insert=0,
-        )
-        conan.install(
-            path="conan",
-            install_folder="build",
-            lockfile='conan/conan-linux64.lock' if system_os == "Linux" else 'conan/conan-win64.lock',
-        )
+        api = ConanAPI()
+        cli = Cli(api)
+        cli.add_commands()
+        api.command.cli = cli
+        lockfile = "conan/conan-linux64.lock" if system_os == "Linux" else "conan/conan-win64.lock"
+        api.command.run("remote add osp https://osp.jfrog.io/artifactory/api/conan/conan-local --force --index 0")
+        api.command.run(f"install conan -b missing --lockfile {lockfile}")
+        
         if system_os == "Linux":
             os.system("patchelf --set-rpath '$ORIGIN' build/libcosimc/*")
