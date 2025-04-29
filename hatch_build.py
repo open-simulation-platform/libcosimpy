@@ -1,30 +1,20 @@
-from typing import Any, Dict
-
-from hatchling.builders.hooks.plugin.interface import BuildHookInterface
-
-from conans.client.conan_api import Conan
+from typing import Any
 import os
 import platform
 
+from hatchling.builders.hooks.plugin.interface import BuildHookInterface
+
 
 class WheelHook(BuildHookInterface):
-    def initialize(self, version: str, build_data: Dict[str, Any]) -> None:
+    def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         super().initialize(version, build_data)
-        build_data["infer_tag"] = True
-        build_data["pure_python"] = False
+        # build_data["infer_tag"] = False
+        # build_data["pure_python"] = False
         system_os = platform.system()
-        conan, _, _ = Conan.factory()
-        conan.config_set("general.revisions_enabled", "True")
-        conan.remote_add(
-            remote_name="osp",
-            url="https://osp.jfrog.io/artifactory/api/conan/conan-local",
-            force=True,
-            insert=0,
+        os.system(
+            "conan remote add osp https://osp.jfrog.io/artifactory/api/conan/conan-local --force --index 0"
         )
-        conan.install(
-            path="conan",
-            install_folder="build",
-            lockfile='conan/conan-linux64.lock' if system_os == "Linux" else 'conan/conan-win64.lock',
-        )
+        os.system("conan profile detect --force")
+        os.system("conan install -u -b missing -of build .")
         if system_os == "Linux":
             os.system("patchelf --set-rpath '$ORIGIN' build/libcosimc/*")

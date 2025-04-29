@@ -4,7 +4,7 @@ from libcosimpy.CosimEnums import CosimExecutionState, CosimErrorCode
 
 
 def test_from_ssp_file(test_dir):
-    execution = CosimExecution.from_ssp_file(ssp_path=f'{test_dir}/data/ssp/demo')
+    execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.execution_status
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
     assert CosimErrorCode(execution_status.error_code) == CosimErrorCode.SUCCESS
@@ -17,7 +17,9 @@ def test_from_ssp_file(test_dir):
 
 
 def test_from_ssp_file_with_step_size(test_dir):
-    execution = CosimExecution.from_ssp_file(ssp_path=f'{test_dir}/data/ssp/demo', step_size=1000)
+    execution = CosimExecution.from_ssp_file(
+        ssp_path=f"{test_dir}/data/ssp/demo", step_size=1000
+    )
     execution_status = execution.execution_status
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
     assert CosimErrorCode(execution_status.error_code) == CosimErrorCode.SUCCESS
@@ -30,7 +32,9 @@ def test_from_ssp_file_with_step_size(test_dir):
 
 
 def test_from_ssp_file_with_step_size_float(test_dir):
-    execution = CosimExecution.from_ssp_file(ssp_path=f'{test_dir}/data/ssp/demo', step_size=1e3)
+    execution = CosimExecution.from_ssp_file(
+        ssp_path=f"{test_dir}/data/ssp/demo", step_size=1e3
+    )
     execution_status = execution.execution_status
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
     assert CosimErrorCode(execution_status.error_code) == CosimErrorCode.SUCCESS
@@ -44,25 +48,27 @@ def test_from_ssp_file_with_step_size_float(test_dir):
 
 def test_step_size_negative(test_dir):
     with raises(AssertionError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=f'{test_dir}/data/ssp/demo', step_size=-1)
+        CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size=-1)
         assert "positive" in str(e_info.value)
 
 
 def test_step_size_zero(test_dir):
     with raises(AssertionError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=f'{test_dir}/data/ssp/demo', step_size=0)
+        CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size=0)
         assert "non-zero" in str(e_info.value)
 
 
 def test_step_size_string(test_dir):
     with raises(ValueError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=f'{test_dir}/data/ssp/demo', step_size="invalid")
+        CosimExecution.from_ssp_file(
+            ssp_path=f"{test_dir}/data/ssp/demo", step_size="invalid"
+        )
         assert "convertible" in str(e_info.value)
 
 
 def test_from_ssp_file_invalid(test_dir):
     with raises(AssertionError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=f'{test_dir}/data/nonexisting')
+        CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/nonexisting")
         assert "path" in str(e_info.value)
 
 

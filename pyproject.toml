@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling~=1.13"]
 build-backend = "hatchling.build"
 
 [project]
@@ -13,11 +13,9 @@ maintainers = [
 ]
 description = "Python wrapper for the libcosim library"
 readme = "README.md"
-requires-python = ">=3.8, <3.13"
+requires-python = ">=3.10, <3.13"
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -25,8 +23,17 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux"
 ]
+
 [project.urls]
 "Homepage" = "https://github.com/open-simulation-platform/libcosimpy"
+
+[dependency-groups]
+dev = [
+    "conan~=2.15.1",
+    "ruff~=0.11.7",
+    "hatchling~=1.13",
+    "pyright>=1.1.400",
+]
 
 # Hatch configurations
 [tool.hatch.version]
@@ -37,7 +44,7 @@ exclude = ["tests", ".github"]
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 dependencies = [
-    "conan==1.64.0",
+    "conan~=2.15.1",
     "patchelf>=0.17.2; platform_system == 'Linux'"
 ]
 
@@ -49,3 +56,47 @@ before-all = "yum install -y libatomic"
 
 [tool.cibuildwheel]
 build = "*-manylinux_x86_64 *-win_amd64"
+
+[tool.pyright]
+stubPath = "stubs"
+include = [
+    "src",
+    "tests",
+    "demos",
+]
+exclude = [
+]
+ignore = [
+]
+
+typeCheckingMode = "basic"
+useLibraryCodeForTypes = true
+reportMissingParameterType = "error"
+reportUnknownParameterType = "warning"
+reportUnknownMemberType = false
+reportMissingTypeArgument = "error"
+reportPropertyTypeMismatch = "error"
+reportFunctionMemberAccess = "warning"
+reportPrivateUsage = "warning"
+reportTypeCommentUsage = "warning"
+reportIncompatibleMethodOverride = "warning"
+reportIncompatibleVariableOverride = "error"
+reportInconsistentConstructor = "error"
+reportOverlappingOverload = "warning"
+reportUninitializedInstanceVariable = "warning"
+reportCallInDefaultInitializer = "warning"
+reportUnnecessaryIsInstance = "information"
+reportUnnecessaryCast = "warning"
+reportUnnecessaryComparison = "warning"
+reportUnnecessaryContains = "warning"
+reportUnusedCallResult = "warning"
+reportUnusedExpression = "warning"
+reportMatchNotExhaustive = "warning"
+reportShadowedImports = "warning"
+reportUntypedFunctionDecorator = "warning"
+reportUntypedClassDecorator = "warning"
+reportUntypedBaseClass = "error"
+reportUntypedNamedTuple = "warning"
+reportUnnecessaryTypeIgnoreComment = "information"
+
+

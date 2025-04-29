@@ -5,6 +5,7 @@ class CosimVariableCausality(Enum):
     """
     Enum for variable causality
     """
+
     INPUT = 0
     PARAMETER = 1
     OUTPUT = 2
@@ -17,6 +18,7 @@ class CosimVariableVariability(Enum):
     """
     Enum for variable variability
     """
+
     CONSTANT = 0
     FIXED = 1
     TUNABLE = 2
@@ -28,6 +30,7 @@ class CosimVariableType(Enum):
     """
     Enum for variable type
     """
+
     REAL = 0
     INTEGER = 1
     STRING = 2
@@ -38,6 +41,7 @@ class CosimErrorCode(Enum):
     """
     Enum for library error codes
     """
+
     NONE = -1  # Undefined
     SUCCESS = 0  # No issues
     UNSPECIFIED = 1
@@ -57,6 +61,7 @@ class CosimExecutionState(Enum):
     """
     Enum for execution simulation states
     """
+
     STOPPED = 0
     RUNNING = 1
     ERROR = 2

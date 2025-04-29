@@ -10,9 +10,9 @@ log_output_level(CosimLogLevel.FATAL)
 
 # Clear content of test log folder
 try:
-    shutil.rmtree(r'./tests/log')
+    shutil.rmtree(r"./tests/log")
 except OSError as e:
-    print("Error: %s : %s" % (r'./tests/log', e.strerror))
+    print("Error: %s : %s" % (r"./tests/log", e.strerror))
 
 
 @pytest.fixture(scope="module")

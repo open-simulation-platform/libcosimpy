@@ -1,6 +1,16 @@
-from ctypes import Structure, c_int64, POINTER, c_int, c_uint32, c_size_t, c_double, c_bool, c_char_p
+from ctypes import (
+    Structure,
+    c_int64,
+    POINTER,
+    c_int,
+    c_uint32,
+    c_size_t,
+    c_double,
+    c_bool,
+    c_char_p,
+)
 from . import CosimLibrary
-from . import Wrapper
+from ._internal import wrap_function
 from . import CosimConstants
 
 
@@ -8,6 +18,7 @@ class CosimManipulator(Structure):
     """
     Manipulator used with CosimExecution to edit variables to simulate scenarios
     """
+
     # Key used to ensure the constructor can only be called from classmethods
     __create_key = object()
 
@@ -20,16 +31,20 @@ class CosimManipulator(Structure):
         :return: CosimManipulator object
         """
         # Constructor should only be called using a classmethod
-        assert (create_key == CosimManipulator.__create_key), \
+        assert create_key == CosimManipulator.__create_key, (
             "Manipulator can only be initialized using the Cosim.Manipulator.create"
+        )
         # Store the pointer used by the C library
         self.__ptr = manipulator_ptr
-        """self.__is_scenario_running = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_scenario_is_running',
+        """self.__is_scenario_running = wrap_function(lib=CosimLibrary.lib, funcname='cosim_scenario_is_running',
                                                            argtypes=[POINTER(CosimManipulator)],
                                                            restype=c_int)"""
-        self.__abort = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_scenario_abort',
-                                             argtypes=[POINTER(CosimManipulator)],
-                                             restype=c_int)
+        self.__abort = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_scenario_abort",
+            argtypes=[POINTER(CosimManipulator)],
+            restype=c_int,
+        )
 
     @classmethod
     def create_override(cls):
@@ -38,9 +53,12 @@ class CosimManipulator(Structure):
 
         :return: CosimManipulator object from constructor
         """
-        override_manipulator_create = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                            funcname='cosim_override_manipulator_create', argtypes=[],
-                                                            restype=POINTER(CosimManipulator))
+        override_manipulator_create = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_override_manipulator_create",
+            argtypes=[],
+            restype=POINTER(CosimManipulator),
+        )
         manipulator_ptr = override_manipulator_create()
         return cls(cls.__create_key, manipulator_ptr)
 
@@ -51,9 +69,12 @@ class CosimManipulator(Structure):
 
         :return CosimManipulator object from constructor
         """
-        scenario_manager_create = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_scenario_manager_create',
-                                                        argtypes=[],
-                                                        restype=POINTER(CosimManipulator))
+        scenario_manager_create = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_scenario_manager_create",
+            argtypes=[],
+            restype=POINTER(CosimManipulator),
+        )
         manipulator_ptr = scenario_manager_create()
         return cls(cls.__create_key, manipulator_ptr)
 
@@ -78,13 +99,13 @@ class CosimManipulator(Structure):
         Helper function to avoid code duplication for set last value
         """
         if c_type == c_double:
-            funcname = 'cosim_manipulator_slave_set_real'
+            funcname = "cosim_manipulator_slave_set_real"
         elif c_type == c_int:
-            funcname = 'cosim_manipulator_slave_set_integer'
+            funcname = "cosim_manipulator_slave_set_integer"
         elif c_type == c_bool:
-            funcname = 'cosim_manipulator_slave_set_boolean'
+            funcname = "cosim_manipulator_slave_set_boolean"
         elif c_type == c_char_p:
-            funcname = 'cosim_manipulator_slave_set_string'
+            funcname = "cosim_manipulator_slave_set_string"
         else:
             raise AssertionError("Invalid ctype")
 
@@ -93,16 +114,25 @@ class CosimManipulator(Structure):
         variable_array = (c_uint32 * variable_count)(*variable_references)
         value_array = (c_type * variable_count)(*values)
 
-        slave_values = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname=funcname,
-                                             argtypes=[POINTER(CosimManipulator),
-                                                       c_int,
-                                                       c_uint32 * variable_count,
-                                                       c_size_t,
-                                                       c_type * variable_count],
-                                             restype=c_int)
+        slave_values = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname=funcname,
+            argtypes=[
+                POINTER(CosimManipulator),
+                c_int,
+                c_uint32 * variable_count,
+                c_size_t,
+                c_type * variable_count,
+            ],
+            restype=c_int,
+        )
 
-        return slave_values(self.__ptr, slave_index, variable_array, variable_count,
-                            value_array) == CosimConstants.success
+        return (
+            slave_values(
+                self.__ptr, slave_index, variable_array, variable_count, value_array
+            )
+            == CosimConstants.success
+        )
 
     def slave_real_values(self, slave_index, variable_references, values):
         """
@@ -113,8 +143,12 @@ class CosimManipulator(Structure):
         :param list of float values: Values to be set for variables in override manipulator
         :return bool Successfully set override values to variables
         """
-        return self.__slave_values(slave_index=slave_index, variable_references=variable_references, values=values,
-                                   c_type=c_double)
+        return self.__slave_values(
+            slave_index=slave_index,
+            variable_references=variable_references,
+            values=values,
+            c_type=c_double,
+        )
 
     def slave_integer_values(self, slave_index, variable_references, values):
         """
@@ -125,8 +159,12 @@ class CosimManipulator(Structure):
         :param list of int values: Values to be set for variables in override manipulator
         :return bool Successfully set override values to variables
         """
-        return self.__slave_values(slave_index=slave_index, variable_references=variable_references, values=values,
-                                   c_type=c_int)
+        return self.__slave_values(
+            slave_index=slave_index,
+            variable_references=variable_references,
+            values=values,
+            c_type=c_int,
+        )
 
     def slave_boolean_values(self, slave_index, variable_references, values):
         """
@@ -137,8 +175,12 @@ class CosimManipulator(Structure):
         :param list of boolean values: Values to be set for variables in override manipulator
         :return bool Successfully set override values to variables
         """
-        return self.__slave_values(slave_index=slave_index, variable_references=variable_references, values=values,
-                                   c_type=c_bool)
+        return self.__slave_values(
+            slave_index=slave_index,
+            variable_references=variable_references,
+            values=values,
+            c_type=c_bool,
+        )
 
     def slave_string_values(self, slave_index, variable_references, values):
         """
@@ -149,8 +191,12 @@ class CosimManipulator(Structure):
         :param list of string values: Values to be set for variables in override manipulator
         :return bool Successfully set override values to variables
         """
-        return self.__slave_values(slave_index=slave_index, variable_references=variable_references,
-                                   values=[v.encode() for v in values], c_type=c_char_p)
+        return self.__slave_values(
+            slave_index=slave_index,
+            variable_references=variable_references,
+            values=[v.encode() for v in values],
+            c_type=c_char_p,
+        )
 
     def reset_variables(self, slave_index, variable_type, variable_references):
         """
@@ -165,16 +211,29 @@ class CosimManipulator(Structure):
 
         variable_array = (c_uint32 * variable_count)(*variable_references)
 
-        slave_reset = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_manipulator_slave_reset',
-                                            argtypes=[POINTER(CosimManipulator),
-                                                      c_int,
-                                                      c_int,
-                                                      c_uint32 * variable_count,
-                                                      c_size_t],
-                                            restype=c_int)
+        slave_reset = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_manipulator_slave_reset",
+            argtypes=[
+                POINTER(CosimManipulator),
+                c_int,
+                c_int,
+                c_uint32 * variable_count,
+                c_size_t,
+            ],
+            restype=c_int,
+        )
 
-        return slave_reset(self.__ptr, slave_index, variable_type.value, variable_array, variable_count) == \
-               CosimConstants.success
+        return (
+            slave_reset(
+                self.__ptr,
+                slave_index,
+                variable_type.value,
+                variable_array,
+                variable_count,
+            )
+            == CosimConstants.success
+        )
 
     def ptr(self):
         """
@@ -188,6 +247,10 @@ class CosimManipulator(Structure):
         Releases C objects when CosimManipulator is deleted in python
         """
         if self.__ptr is not None:
-            manipulator_destroy = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_manipulator_destroy',
-                                                        argtypes=[POINTER(CosimManipulator)], restype=c_int64)
+            manipulator_destroy = wrap_function(
+                lib=CosimLibrary.lib,
+                funcname="cosim_manipulator_destroy",
+                argtypes=[POINTER(CosimManipulator)],
+                restype=c_int64,
+            )
             manipulator_destroy(self.__ptr)

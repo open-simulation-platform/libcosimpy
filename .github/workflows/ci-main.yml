@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ 'windows-latest', 'ubuntu-latest' ]
-        python-version: [ 'cp38', 'cp39', 'cp310', 'cp311', 'cp312' ]
+        python-version: [ 'cp310', 'cp311', 'cp312' ]
     timeout-minutes: 35
     env:
       CONAN_REVISIONS_ENABLED: 1

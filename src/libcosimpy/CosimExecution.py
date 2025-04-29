@@ -1,5 +1,16 @@
-from ctypes import Structure, c_int, POINTER, c_int64, c_char_p, c_bool, c_double, pointer, c_size_t, c_uint32
-from . import Wrapper
+from ctypes import (
+    Structure,
+    c_int,
+    POINTER,
+    c_int64,
+    c_char_p,
+    c_bool,
+    c_double,
+    pointer,
+    c_size_t,
+    c_uint32,
+)
+from ._internal import wrap_function
 from . import CosimLibrary
 from . import CosimManipulator
 from . import CosimSlave
@@ -12,6 +23,7 @@ class CosimExecution(Structure):
     """
     A cosim execution object to hold and run simulation configurations. Object initialized with classmethods with .from
     """
+
     # Key used to ensure the constructor can only be called from classmethods
     __create_key = object()
 
@@ -27,95 +39,131 @@ class CosimExecution(Structure):
         self.__ptr = execution_ptr
 
         # Constructor should only be called using a classmethod
-        assert (create_key == CosimExecution.__create_key), \
+        assert create_key == CosimExecution.__create_key, (
             "Execution can only be initialized using the CosimExecution.from"
+        )
 
         # Pointer to be passed to C function when requesting status updates
         self.execution_status = CosimExecutionStatus()
         self.__execution_status_ptr = pointer(self.execution_status)
 
-        self.__multiple_steps = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_step',
-                                                      argtypes=[POINTER(CosimExecution), c_int64],
-                                                      restype=None)
-        self.__add_local_slave = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_add_slave',
-                                                       argtypes=[POINTER(CosimExecution),
-                                                                 POINTER(CosimSlave.CosimLocalSlave)],
-                                                       restype=c_int)
-        self.__simulate_until = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_simulate_until',
-                                                      argtypes=[POINTER(CosimExecution), c_int64], restype=c_int)
-        self.__stop = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_stop',
-                                            argtypes=[POINTER(CosimExecution)],
-                                            restype=c_int)
-        self.__enable_real_time_simulation = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                                   funcname='cosim_execution_enable_real_time_simulation',
-                                                                   argtypes=[POINTER(CosimExecution)],
-                                                                   restype=c_int)
-        self.__disable_real_time_simulation = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                                    funcname='cosim_execution_disable_real_time_simulation',
-                                                                    argtypes=[POINTER(CosimExecution)],
-                                                                    restype=c_int)
-        self.__real_time_factor_target = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                               funcname='cosim_execution_set_real_time_factor_target',
-                                                               argtypes=[POINTER(CosimExecution), c_double],
-                                                               restype=c_int)
-        self.__steps_to_monitor = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                        funcname='cosim_execution_set_steps_to_monitor',
-                                                        argtypes=[POINTER(CosimExecution), c_int],
-                                                        restype=c_int)
-        self.__add_manipulator = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_add_manipulator',
-                                                       argtypes=[POINTER(CosimExecution),
-                                                                 POINTER(CosimManipulator.CosimManipulator)],
-                                                       restype=c_int)
-        self.__add_observer = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_add_observer',
-                                                    argtypes=[POINTER(CosimExecution),
-                                                              POINTER(CosimObserver.CosimObserver)],
-                                                    restype=c_int)
-        self.__status = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_get_status',
-                                              argtypes=[POINTER(CosimExecution), POINTER(CosimExecutionStatus)],
-                                              restype=c_int)
-        self.__slave_num_variables = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                           funcname='cosim_slave_get_num_variables',
-                                                           argtypes=[POINTER(CosimExecution), c_int],
-                                                           restype=c_int)
-        self.__num_modified_variables = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                              funcname='cosim_get_num_modified_variables',
-                                                              argtypes=[POINTER(CosimExecution)],
-                                                              restype=c_int)
-        self.__load_scenario = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_load_scenario',
-                                                     argtypes=[POINTER(CosimExecution),
-                                                               POINTER(CosimManipulator.CosimManipulator),
-                                                               c_char_p],
-                                                     restype=c_int)
-        self.__real_initial = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                    funcname='cosim_execution_set_real_initial_value',
-                                                    argtypes=[POINTER(CosimExecution),
-                                                              c_int,
-                                                              c_uint32,
-                                                              c_double],
-                                                    restype=c_int)
-        self.__integer_initial = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                       funcname='cosim_execution_set_integer_initial_value',
-                                                       argtypes=[POINTER(CosimExecution),
-                                                                 c_int,
-                                                                 c_uint32,
-                                                                 c_int],
-                                                       restype=c_int)
+        self.__multiple_steps = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_step",
+            argtypes=[POINTER(CosimExecution), c_int64],
+            restype=None,
+        )
+        self.__add_local_slave = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_add_slave",
+            argtypes=[POINTER(CosimExecution), POINTER(CosimSlave.CosimLocalSlave)],
+            restype=c_int,
+        )
+        self.__simulate_until = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_simulate_until",
+            argtypes=[POINTER(CosimExecution), c_int64],
+            restype=c_int,
+        )
+        self.__stop = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_stop",
+            argtypes=[POINTER(CosimExecution)],
+            restype=c_int,
+        )
+        self.__enable_real_time_simulation = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_enable_real_time_simulation",
+            argtypes=[POINTER(CosimExecution)],
+            restype=c_int,
+        )
+        self.__disable_real_time_simulation = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_disable_real_time_simulation",
+            argtypes=[POINTER(CosimExecution)],
+            restype=c_int,
+        )
+        self.__real_time_factor_target = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_set_real_time_factor_target",
+            argtypes=[POINTER(CosimExecution), c_double],
+            restype=c_int,
+        )
+        self.__steps_to_monitor = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_set_steps_to_monitor",
+            argtypes=[POINTER(CosimExecution), c_int],
+            restype=c_int,
+        )
+        self.__add_manipulator = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_add_manipulator",
+            argtypes=[
+                POINTER(CosimExecution),
+                POINTER(CosimManipulator.CosimManipulator),
+            ],
+            restype=c_int,
+        )
+        self.__add_observer = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_add_observer",
+            argtypes=[POINTER(CosimExecution), POINTER(CosimObserver.CosimObserver)],
+            restype=c_int,
+        )
+        self.__status = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_get_status",
+            argtypes=[POINTER(CosimExecution), POINTER(CosimExecutionStatus)],
+            restype=c_int,
+        )
+        self.__slave_num_variables = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_slave_get_num_variables",
+            argtypes=[POINTER(CosimExecution), c_int],
+            restype=c_int,
+        )
+        self.__num_modified_variables = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_get_num_modified_variables",
+            argtypes=[POINTER(CosimExecution)],
+            restype=c_int,
+        )
+        self.__load_scenario = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_load_scenario",
+            argtypes=[
+                POINTER(CosimExecution),
+                POINTER(CosimManipulator.CosimManipulator),
+                c_char_p,
+            ],
+            restype=c_int,
+        )
+        self.__real_initial = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_set_real_initial_value",
+            argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_double],
+            restype=c_int,
+        )
+        self.__integer_initial = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_set_integer_initial_value",
+            argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_int],
+            restype=c_int,
+        )
 
-        self.__boolean_initial = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                       funcname='cosim_execution_set_boolean_initial_value',
-                                                       argtypes=[POINTER(CosimExecution),
-                                                                 c_int,
-                                                                 c_uint32,
-                                                                 c_bool],
-                                                       restype=c_int)
+        self.__boolean_initial = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_set_boolean_initial_value",
+            argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_bool],
+            restype=c_int,
+        )
 
-        self.__string_initial = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                      funcname='cosim_execution_set_string_initial_value',
-                                                      argtypes=[POINTER(CosimExecution),
-                                                                c_int,
-                                                                c_uint32,
-                                                                c_char_p],
-                                                      restype=c_int)
+        self.__string_initial = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_set_string_initial_value",
+            argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_char_p],
+            restype=c_int,
+        )
 
     @classmethod
     def from_step_size(cls, step_size):
@@ -135,12 +183,14 @@ class CosimExecution(Structure):
             except ValueError as error:
                 raise ValueError("Step size must be an int convertible")
 
-        assert (step_size > 0), \
-            "Step size must be a positive and non-zero integer"
+        assert step_size > 0, "Step size must be a positive and non-zero integer"
 
-        execution_create = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_create',
-                                                 argtypes=[c_int64, c_int64],
-                                                 restype=POINTER(CosimExecution))
+        execution_create = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_create_v2",
+            argtypes=[c_int64, c_int64],
+            restype=POINTER(CosimExecution),
+        )
         execution_ptr = execution_create(0, step_size_int)
         return cls(cls.__create_key, execution_ptr)
 
@@ -152,9 +202,12 @@ class CosimExecution(Structure):
         :param str osp_path: Path to .ssd file or OspSystemStructure.xml file
         :return: CosimExecution object
         """
-        osp_execution_create = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_osp_config_execution_create',
-                                                     argtypes=[c_char_p, c_bool, c_int64],
-                                                     restype=POINTER(CosimExecution))
+        osp_execution_create = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_osp_config_execution_create",
+            argtypes=[c_char_p, c_bool, c_int64],
+            restype=POINTER(CosimExecution),
+        )
         try:
             encoded_osp_path = osp_path.encode()
         except AttributeError as error:
@@ -162,8 +215,9 @@ class CosimExecution(Structure):
 
         execution_ptr = osp_execution_create(encoded_osp_path, False, 0)
 
-        assert execution_ptr, \
+        assert execution_ptr, (
             "Unable to create execution from path. Please check if path is correct."
+        )
 
         return cls(cls.__create_key, execution_ptr)
 
@@ -178,9 +232,12 @@ class CosimExecution(Structure):
         """
         if step_size is None:
             # Create simulation without defined step size
-            ssp_execution_create = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_ssp_execution_create',
-                                                         argtypes=[c_char_p, c_bool, c_int64],
-                                                         restype=POINTER(CosimExecution))
+            ssp_execution_create = wrap_function(
+                lib=CosimLibrary.lib,
+                funcname="cosim_ssp_execution_create",
+                argtypes=[c_char_p, c_bool, c_int64],
+                restype=POINTER(CosimExecution),
+            )
             execution_ptr = ssp_execution_create(ssp_path.encode(), False, 0)
         else:
             try:
@@ -193,18 +250,22 @@ class CosimExecution(Structure):
                 except ValueError as error:
                     raise ValueError("Step size must be an int convertible")
 
-            assert (step_size > 0), \
-                "Step size must be a positive and non-zero integer"
+            assert step_size > 0, "Step size must be a positive and non-zero integer"
 
             # Create simulation with defined step size
-            ssp_fixed_step_execution_create = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                                    funcname='cosim_ssp_fixed_step_execution_create',
-                                                                    argtypes=[c_char_p, c_bool, c_int64, c_int64],
-                                                                    restype=POINTER(CosimExecution))
-            execution_ptr = ssp_fixed_step_execution_create(ssp_path.encode(), False, 0, step_size_int)
+            ssp_fixed_step_execution_create = wrap_function(
+                lib=CosimLibrary.lib,
+                funcname="cosim_ssp_fixed_step_execution_create",
+                argtypes=[c_char_p, c_bool, c_int64, c_int64],
+                restype=POINTER(CosimExecution),
+            )
+            execution_ptr = ssp_fixed_step_execution_create(
+                ssp_path.encode(), False, 0, step_size_int
+            )
 
-        assert execution_ptr, \
+        assert execution_ptr, (
             "Unable to create execution from path. Please check if path is correct."
+        )
 
         return cls(cls.__create_key, execution_ptr)
 
@@ -214,10 +275,12 @@ class CosimExecution(Structure):
 
         :return: int Number of currently connected slaves
         """
-        execution_get_num_slaves = Wrapper.wrap_function(lib=CosimLibrary.lib,
-                                                         funcname='cosim_execution_get_num_slaves',
-                                                         argtypes=[POINTER(CosimExecution)],
-                                                         restype=c_int)
+        execution_get_num_slaves = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_get_num_slaves",
+            argtypes=[POINTER(CosimExecution)],
+            restype=c_int,
+        )
         return execution_get_num_slaves(self.__ptr)
 
     def start(self):
@@ -226,9 +289,12 @@ class CosimExecution(Structure):
 
         :return: bool Successful start of execution
         """
-        execution_start = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_start',
-                                                argtypes=[POINTER(CosimExecution)],
-                                                restype=c_int)
+        execution_start = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_start",
+            argtypes=[POINTER(CosimExecution)],
+            restype=c_int,
+        )
         return execution_start(self.__ptr) == CosimConstants.success
 
     def stop(self):
@@ -256,9 +322,12 @@ class CosimExecution(Structure):
             except ValueError as error:
                 raise ValueError("Target time must be an int convertible")
 
-        assert (target_time_int > 0), \
+        assert target_time_int > 0, (
             "Target time must be a positive and non-zero integer"
-        return self.__simulate_until(self.__ptr, target_time_int) != CosimConstants.failure
+        )
+        return (
+            self.__simulate_until(self.__ptr, target_time_int) != CosimConstants.failure
+        )
 
     def step(self, step_count=1):
         """
@@ -277,9 +346,14 @@ class CosimExecution(Structure):
         :return: bool Successfully set real time state to desired value
         """
         if enabled:
-            return self.__enable_real_time_simulation(self.__ptr) == CosimConstants.success
+            return (
+                self.__enable_real_time_simulation(self.__ptr) == CosimConstants.success
+            )
         else:
-            return self.__disable_real_time_simulation(self.__ptr) == CosimConstants.success
+            return (
+                self.__disable_real_time_simulation(self.__ptr)
+                == CosimConstants.success
+            )
 
     def real_time_factor_target(self, real_time_factor):
         """
@@ -288,7 +362,10 @@ class CosimExecution(Structure):
         :param float real_time_factor: Real time factor
         :return: bool Successfully set real time factor
         """
-        return self.__real_time_factor_target(self.__ptr, float(real_time_factor)) == CosimConstants.success
+        return (
+            self.__real_time_factor_target(self.__ptr, float(real_time_factor))
+            == CosimConstants.success
+        )
 
     def steps_to_monitor(self, step_count):
         """
@@ -297,8 +374,7 @@ class CosimExecution(Structure):
         :param int step_count: Size of window
         :return: bool Successfully set number of steps
         """
-        assert (step_count > 0), \
-            "Step count must be a positive and non-zero integer"
+        assert step_count > 0, "Step count must be a positive and non-zero integer"
 
         return self.__steps_to_monitor(self.__ptr, step_count) == CosimConstants.success
 
@@ -309,7 +385,10 @@ class CosimExecution(Structure):
         :param CosimManipulator manipulator: Manipulator to be added
         :return: bool Successfully added manipulator to execution
         """
-        return self.__add_manipulator(self.__ptr, manipulator.ptr()) == CosimConstants.success
+        return (
+            self.__add_manipulator(self.__ptr, manipulator.ptr())
+            == CosimConstants.success
+        )
 
     def add_observer(self, observer):
         """
@@ -333,7 +412,10 @@ class CosimExecution(Structure):
         except AttributeError as error:
             raise AttributeError("Unable to encode scenario path file")
 
-        return self.__load_scenario(self.__ptr, manipulator.ptr(), encoded_path) == CosimConstants.success
+        return (
+            self.__load_scenario(self.__ptr, manipulator.ptr(), encoded_path)
+            == CosimConstants.success
+        )
 
     def status(self):
         """
@@ -352,10 +434,16 @@ class CosimExecution(Structure):
         """
         slave_count = self.num_slaves()
         slave_infos_list = (CosimSlave.CosimSlaveInfo * slave_count)()
-        slave_infos = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_get_slave_infos',
-                                            argtypes=[POINTER(CosimExecution), CosimSlave.CosimSlaveInfo * slave_count,
-                                                      c_size_t],
-                                            restype=c_int)
+        slave_infos = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_get_slave_infos",
+            argtypes=[
+                POINTER(CosimExecution),
+                CosimSlave.CosimSlaveInfo * slave_count,
+                c_size_t,
+            ],
+            restype=c_int,
+        )
         slave_infos(self.__ptr, slave_infos_list, slave_count)
         return slave_infos_list
 
@@ -398,13 +486,23 @@ class CosimExecution(Structure):
         :return: List of CosimSlaveVariableDescription variables of size num_slave_variables(slave_index)
         """
         slave_variables_count = self.num_slave_variables(slave_index)
-        slave_variables_list = (CosimSlave.CosimSlaveVariableDescription * slave_variables_count)()
-        slave_variables = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_slave_get_variables',
-                                                argtypes=[POINTER(CosimExecution), c_int,
-                                                          CosimSlave.CosimSlaveVariableDescription * slave_variables_count,
-                                                          c_size_t],
-                                                restype=c_int)
-        slave_variables(self.__ptr, slave_index, slave_variables_list, slave_variables_count)
+        slave_variables_list = (
+            CosimSlave.CosimSlaveVariableDescription * slave_variables_count
+        )()
+        slave_variables = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_slave_get_variables",
+            argtypes=[
+                POINTER(CosimExecution),
+                c_int,
+                CosimSlave.CosimSlaveVariableDescription * slave_variables_count,
+                c_size_t,
+            ],
+            restype=c_int,
+        )
+        slave_variables(
+            self.__ptr, slave_index, slave_variables_list, slave_variables_count
+        )
         return slave_variables_list
 
     def real_initial_value(self, slave_index, variable_reference, value):
@@ -416,7 +514,10 @@ class CosimExecution(Structure):
         :param float value: Value to be set as initial value
         :return: bool Successfully set initial value
         """
-        return self.__real_initial(self.__ptr, slave_index, variable_reference, value) == CosimConstants.success
+        return (
+            self.__real_initial(self.__ptr, slave_index, variable_reference, value)
+            == CosimConstants.success
+        )
 
     def integer_initial_value(self, slave_index, variable_reference, value):
         """
@@ -427,7 +528,10 @@ class CosimExecution(Structure):
         :param int value: Value to be set as initial value
         :return: bool Successfully set initial value
         """
-        return self.__integer_initial(self.__ptr, slave_index, variable_reference, value) == CosimConstants.success
+        return (
+            self.__integer_initial(self.__ptr, slave_index, variable_reference, value)
+            == CosimConstants.success
+        )
 
     def boolean_initial_value(self, slave_index, variable_reference, value):
         """
@@ -438,7 +542,10 @@ class CosimExecution(Structure):
         :param bool value: Value to be set as initial value
         :return: bool Successfully set initial value
         """
-        return self.__boolean_initial(self.__ptr, slave_index, variable_reference, value) == CosimConstants.success
+        return (
+            self.__boolean_initial(self.__ptr, slave_index, variable_reference, value)
+            == CosimConstants.success
+        )
 
     def string_initial_value(self, slave_index, variable_reference, value):
         """
@@ -449,8 +556,12 @@ class CosimExecution(Structure):
         :param float value: Value to be set as initial value
         :return: bool Successfully set initial value
         """
-        return self.__string_initial(self.__ptr, slave_index, variable_reference,
-                                     value.encode()) == CosimConstants.success
+        return (
+            self.__string_initial(
+                self.__ptr, slave_index, variable_reference, value.encode()
+            )
+            == CosimConstants.success
+        )
 
     def __del__(self):
         """
@@ -458,8 +569,12 @@ class CosimExecution(Structure):
         """
         # Release object in C when object is removed (if pointer exists)
         if self.__ptr is not None:
-            execution_destroy = Wrapper.wrap_function(lib=CosimLibrary.lib, funcname='cosim_execution_destroy',
-                                                      argtypes=[POINTER(CosimExecution)], restype=c_int)
+            execution_destroy = wrap_function(
+                lib=CosimLibrary.lib,
+                funcname="cosim_execution_destroy",
+                argtypes=[POINTER(CosimExecution)],
+                restype=c_int,
+            )
             execution_destroy(self.__ptr)
 
 
@@ -467,16 +582,22 @@ class CosimExecutionStatus(Structure):
     """
     Object holding the status of an execution
     """
+
     _fields_ = [
-        ('current_time', c_int64), ('state', c_int), ('error_code', c_int), ('real_time_factor', c_double),
-        ('rolling_average_real_time_factor', c_double), ('real_time_factor_target', c_double),
-        ('is_real_time_simulation', c_int),
-        ('steps_to_monitor', c_int)
+        ("current_time", c_int64),
+        ("state", c_int),
+        ("error_code", c_int),
+        ("real_time_factor", c_double),
+        ("rolling_average_real_time_factor", c_double),
+        ("real_time_factor_target", c_double),
+        ("is_real_time_simulation", c_int),
+        ("steps_to_monitor", c_int),
     ]
 
     def __repr__(self):
-        return 'current_time: {0}, state: {1}, error_code: {2}, real_time_factor: {3}, real_time_factor_target: {4}, ' \
-               'rolling_average_real_time_factor: {5}, is_real_time_simulation: {6}, steps_to_monitor: {7}'.format(
+        return (
+            "current_time: {0}, state: {1}, error_code: {2}, real_time_factor: {3}, real_time_factor_target: {4}, "
+            "rolling_average_real_time_factor: {5}, is_real_time_simulation: {6}, steps_to_monitor: {7}".format(
                 self.current_time,
                 CosimEnums.CosimExecutionState(self.state),
                 CosimEnums.CosimErrorCode(self.error_code),
@@ -484,4 +605,6 @@ class CosimExecutionStatus(Structure):
                 self.real_time_factor_target,
                 self.rolling_average_real_time_factor,
                 self.is_real_time_simulation,
-                self.steps_to_monitor)
+                self.steps_to_monitor,
+            )
+        )
