@@ -1,37 +1,51 @@
+from __future__ import annotations
+
+import typing
 from ctypes import (
-    Structure,
     POINTER,
+    Structure,
     c_double,
+    c_int,
 )
 from dataclasses import dataclass
 from typing import Optional
 
 from . import CosimLibrary
-from ._internal import CTypeMeta, wrap_function
+from ._internal import wrap_function, get_last_error_message
+
+if typing.TYPE_CHECKING:
+    from ctypes import _Pointer  # pyright: ignore[reportPrivateUsage]
+
+    CosimAlgorithmPtr = _Pointer["CosimAlgorithm"]
+else:
+    CosimAlgorithmPtr = POINTER("CosimAlgorithm")
 
 
 @dataclass
-class EccoParams(Structure, metaclass=CTypeMeta):
-    safety_factor: c_double = c_double(0.8)
-    step_size: c_double = c_double(0.01)
-    min_step_size: c_double = c_double(1e-4)
-    max_step_size: c_double = c_double(1e-4)
-    min_change_rate: c_double = c_double(0.01)
-    max_change_rate: c_double = c_double(0.2)
-    abs_tolerance: c_double = c_double(1e-4)
-    rel_tolerance: c_double = c_double(1e-4)
-    p_gain: c_double = c_double(0.2)
-    i_gain: c_double = c_double(0.15)
+class EccoParams(Structure):
+    """
+    Ecco algorithm parameters. All parameters are in seconds.
+    """
+    safety_factor: float = 0.8
+    step_size: float = 0.01
+    min_step_size: float = 1e-4
+    max_step_size: float = 0.1
+    min_change_rate: float = 0.01
+    max_change_rate: float = 0.2
+    abs_tolerance: float = 1e-4
+    rel_tolerance: float = 1e-4
+    p_gain: float = 0.2
+    i_gain: float = 0.15
 
 
 class CosimAlgorithm(Structure):
     __create_key: object = object()
-    __ptr: Optional["CosimAlgorithm"] = None
+    __ptr: Optional[CosimAlgorithmPtr] = None
 
     def __init__(
         self,
         create_key: object = None,
-        algorithm_ptr: Optional[POINTER("CosimAlgorithm")] = None,
+        algorithm_ptr: Optional[CosimAlgorithmPtr] = None,
     ):
         """
         Creates a co-sim algorithm
@@ -45,12 +59,12 @@ class CosimAlgorithm(Structure):
         self.__ptr = algorithm_ptr
 
         # Constructor should only be called using a classmethod
-        assert create_key is not CosimAlgorithm.__create_key, (
+        assert create_key is CosimAlgorithm.__create_key, (
             "Execution can only be initialized using the CosimAlgorithm.create"
         )
 
     @classmethod
-    def create_ecco_algorithm(cls, param: EccoParams) -> "CosimAlgorithm":
+    def create_ecco_algorithm(cls, param: EccoParams) -> CosimAlgorithm:
         ecco_algorithm_create = wrap_function(
             lib=CosimLibrary.lib,
             funcname="cosim_ecco_algorithm_create",
@@ -81,5 +95,29 @@ class CosimAlgorithm(Structure):
             param.p_gain,
             param.i_gain,
         )
+        if not ecco_algorithm_ptr:
+            raise RuntimeError(get_last_error_message())
 
         return cls(cls.__create_key, ecco_algorithm_ptr)
+
+
+    @property
+    def ptr(self) -> Optional[CosimAlgorithmPtr]:
+        """
+        Returns the pointer to the C object
+        """
+        return self.__ptr
+
+    def __del__(self):
+        """
+        Releases C objects when CosimAlgorithm is deleted in python
+        """
+        # Release object in C when object is removed (if pointer exists)
+        if self.__ptr is not None:
+            algorithm_destroy = wrap_function(
+                lib=CosimLibrary.lib,
+                funcname="cosim_algorithm_destroy",
+                argtypes=[POINTER(CosimAlgorithm)],
+                restype=c_int,
+            )
+            algorithm_destroy(self.__ptr)

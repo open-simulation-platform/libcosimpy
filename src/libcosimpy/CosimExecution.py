@@ -10,6 +10,8 @@ from ctypes import (
     c_size_t,
     c_uint32,
 )
+
+from .CosimAlgorithm import CosimAlgorithm
 from ._internal import wrap_function
 from . import CosimLibrary
 from . import CosimManipulator
@@ -39,7 +41,7 @@ class CosimExecution(Structure):
         self.__ptr = execution_ptr
 
         # Constructor should only be called using a classmethod
-        assert create_key == CosimExecution.__create_key, (
+        assert create_key is CosimExecution.__create_key, (
             "Execution can only be initialized using the CosimExecution.from"
         )
 
@@ -166,6 +168,26 @@ class CosimExecution(Structure):
         )
 
     @classmethod
+    def from_algorithm(cls, algorithm: CosimAlgorithm):
+        """
+        Create an empty execution based on the algorithm
+        :param algorithm: An algorithm instance to be used to create an execution
+        :return: CosimExecution object
+        """
+        execution_create = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_create_v2",
+            argtypes=[c_int64, POINTER(CosimAlgorithm)],
+            restype=POINTER(CosimExecution),
+        )
+        execution_ptr = execution_create(0, algorithm.ptr)
+
+        if not execution_ptr:
+            raise RuntimeError("Unable to create execution from algorithm")
+
+        return cls(cls.__create_key, execution_ptr)
+
+    @classmethod
     def from_step_size(cls, step_size):
         """
         Creates empty execution based on step size
@@ -175,19 +197,19 @@ class CosimExecution(Structure):
         """
         try:
             step_size_int = int(step_size)
-        except TypeError as error:
+        except TypeError:
             raise TypeError("Step size must be an int convertible")
-        except ValueError as error:
+        except ValueError:
             try:
                 step_size_int = int(float(step_size))
-            except ValueError as error:
+            except ValueError:
                 raise ValueError("Step size must be an int convertible")
 
         assert step_size > 0, "Step size must be a positive and non-zero integer"
 
         execution_create = wrap_function(
             lib=CosimLibrary.lib,
-            funcname="cosim_execution_create_v2",
+            funcname="cosim_execution_create",
             argtypes=[c_int64, c_int64],
             restype=POINTER(CosimExecution),
         )
@@ -210,7 +232,7 @@ class CosimExecution(Structure):
         )
         try:
             encoded_osp_path = osp_path.encode()
-        except AttributeError as error:
+        except AttributeError:
             raise AttributeError("Unable to encode OSP path")
 
         execution_ptr = osp_execution_create(encoded_osp_path, False, 0)
@@ -242,12 +264,12 @@ class CosimExecution(Structure):
         else:
             try:
                 step_size_int = int(step_size)
-            except TypeError as error:
+            except TypeError:
                 raise TypeError("Step size must be an int convertible")
-            except ValueError as error:
+            except ValueError:
                 try:
                     step_size_int = int(float(step_size))
-                except ValueError as error:
+                except ValueError:
                     raise ValueError("Step size must be an int convertible")
 
             assert step_size > 0, "Step size must be a positive and non-zero integer"
@@ -314,12 +336,12 @@ class CosimExecution(Structure):
         """
         try:
             target_time_int = int(target_time)
-        except TypeError as error:
+        except TypeError:
             raise TypeError("Target time must be an int convertible")
-        except ValueError as error:
+        except ValueError:
             try:
                 target_time_int = int(float(target_time))
-            except ValueError as error:
+            except ValueError:
                 raise ValueError("Target time must be an int convertible")
 
         assert target_time_int > 0, (
@@ -409,7 +431,7 @@ class CosimExecution(Structure):
         """
         try:
             encoded_path = scenario_file.encode()
-        except AttributeError as error:
+        except AttributeError:
             raise AttributeError("Unable to encode scenario path file")
 
         return (
