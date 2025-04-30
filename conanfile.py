@@ -8,7 +8,7 @@ class LibCosimpyConanDependency(ConanFile):
         "libcosim/*:proxyfmu": True,
     }
 
-    def requirements(self):
+    def build_requirements(self):
         self.tool_requires("cmake/[<4.0 >=3.15]", override=True)
 
     def generate(self):
