@@ -3,7 +3,7 @@ from libcosimpy.CosimExecution import CosimExecution
 from libcosimpy.CosimEnums import CosimExecutionState, CosimErrorCode
 
 
-def test_from_ssp_file(test_dir):
+def test_from_ssp_file(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.execution_status
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
@@ -16,10 +16,8 @@ def test_from_ssp_file(test_dir):
     assert name_set == {"KnuckleBoomCrane", "CraneController"}
 
 
-def test_from_ssp_file_with_step_size(test_dir):
-    execution = CosimExecution.from_ssp_file(
-        ssp_path=f"{test_dir}/data/ssp/demo", step_size=1000
-    )
+def test_from_ssp_file_with_step_size(test_dir: str):
+    execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size=1000)
     execution_status = execution.execution_status
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
     assert CosimErrorCode(execution_status.error_code) == CosimErrorCode.SUCCESS
@@ -31,10 +29,8 @@ def test_from_ssp_file_with_step_size(test_dir):
     assert name_set == {"KnuckleBoomCrane", "CraneController"}
 
 
-def test_from_ssp_file_with_step_size_float(test_dir):
-    execution = CosimExecution.from_ssp_file(
-        ssp_path=f"{test_dir}/data/ssp/demo", step_size=1e3
-    )
+def test_from_ssp_file_with_step_size_float(test_dir: str):
+    execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size=1e3)
     execution_status = execution.execution_status
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
     assert CosimErrorCode(execution_status.error_code) == CosimErrorCode.SUCCESS
@@ -46,45 +42,43 @@ def test_from_ssp_file_with_step_size_float(test_dir):
     assert crane_controller.name.decode() == "CraneController"
 
 
-def test_step_size_negative(test_dir):
+def test_step_size_negative(test_dir: str):
     with raises(AssertionError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size=-1)
+        _ = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size=-1)
         assert "positive" in str(e_info.value)
 
 
-def test_step_size_zero(test_dir):
+def test_step_size_zero(test_dir: str):
     with raises(AssertionError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size=0)
+        _ = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size=0)
         assert "non-zero" in str(e_info.value)
 
 
-def test_step_size_string(test_dir):
+def test_step_size_string(test_dir: str):
     with raises(ValueError) as e_info:
-        CosimExecution.from_ssp_file(
-            ssp_path=f"{test_dir}/data/ssp/demo", step_size="invalid"
-        )
+        _ = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo", step_size="invalid")  # pyright: ignore
         assert "convertible" in str(e_info.value)
 
 
-def test_from_ssp_file_invalid(test_dir):
+def test_from_ssp_file_invalid(test_dir: str):
     with raises(AssertionError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/nonexisting")
+        _ = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/nonexisting")
         assert "path" in str(e_info.value)
 
 
 def test_from_ssp_file_none():
     with raises(AttributeError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=None)
+        _ = CosimExecution.from_ssp_file(ssp_path=None)  # pyright: ignore
         assert "encode" in str(e_info.value)
 
 
 def test_from_osp_file_not_a_path():
     with raises(AssertionError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path="not a valid path")
+        _ = CosimExecution.from_ssp_file(ssp_path="not a valid path")
         assert "path" in str(e_info.value)
 
 
 def test_from_osp_file_invalid_type():
     with raises(AttributeError) as e_info:
-        CosimExecution.from_ssp_file(ssp_path=0)
+        _ = CosimExecution.from_ssp_file(ssp_path=0)  # pyright: ignore
         assert "encode" in str(e_info.value)

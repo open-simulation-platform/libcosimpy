@@ -1,7 +1,6 @@
 import ctypes
 from typing import Any
 
-from _ctypes import POINTER
 
 from libcosimpy import CosimLibrary
 
@@ -29,4 +28,3 @@ def get_last_error_message() -> str:
         restype=ctypes.c_char_p,
     )
     return cosim_last_error_message().decode("utf-8")
-

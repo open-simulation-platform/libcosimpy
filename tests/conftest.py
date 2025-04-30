@@ -1,6 +1,5 @@
 from libcosimpy.CosimLogging import log_output_level, CosimLogLevel
 import shutil
-import os
 import pytest
 from os.path import dirname as d
 from os.path import abspath

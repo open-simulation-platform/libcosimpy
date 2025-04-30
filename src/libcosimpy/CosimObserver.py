@@ -9,10 +9,22 @@ from ctypes import (
     c_double,
     c_size_t,
     c_bool,
+    c_uint64,
 )
+from typing import Optional, TYPE_CHECKING, Any
+
 from . import CosimLibrary
+from .CosimEnums import CosimVariableType
 from ._internal import wrap_function
 from . import CosimConstants
+
+
+if TYPE_CHECKING:
+    from ctypes import _Pointer  # pyright: ignore[reportPrivateUsage]
+
+    CosimObserverPtr = _Pointer["CosimObserver"]
+else:
+    CosimObserverPtr = POINTER("CosimObserver")
 
 
 class CosimObserver(Structure):
@@ -21,9 +33,10 @@ class CosimObserver(Structure):
     """
 
     # Key used to ensure the constructor can only be called from classmethods
-    __create_key = object()
+    __create_key: object = object()
+    __ptr: Optional[CosimObserverPtr] = None
 
-    def __init__(self, create_key=None, observer_ptr=None):
+    def __init__(self, create_key: object = None, observer_ptr: Optional[CosimObserverPtr] = None):
         """
         Creates CosimObserver from classmethod calls starting with .create
 
@@ -31,6 +44,8 @@ class CosimObserver(Structure):
         :param POINTER(CosimObserver) observer_ptr: Pointer to object created by classmethod
         :return: CosimObserver object
         """
+        super().__init__()
+
         # Constructor should only be called using a classmethod
         assert create_key == CosimObserver.__create_key, (
             "Observer can only be initialized using the CosimExecution.create"
@@ -73,7 +88,7 @@ class CosimObserver(Structure):
         return cls(cls.__create_key, observer_ptr)
 
     @classmethod
-    def create_to_dir(cls, log_dir):
+    def create_to_dir(cls, log_dir: str):
         """
         Creates observer with specified logging directory
 
@@ -106,7 +121,7 @@ class CosimObserver(Structure):
         return cls(cls.__create_key, observer_ptr)"""
 
     @classmethod
-    def create_time_series(cls, buffer_size=None):
+    def create_time_series(cls, buffer_size: Optional[int] = None):
         """
         Creates observer with memory buffer. Initialized by calling the start_time_series() function
 
@@ -126,13 +141,13 @@ class CosimObserver(Structure):
             buffered_time_series_create = wrap_function(
                 lib=CosimLibrary.lib,
                 funcname="cosim_buffered_time_series_observer_create",
-                argtypes=[c_int64],
+                argtypes=[c_uint64],
                 restype=POINTER(CosimObserver),
             )
             observer_ptr = buffered_time_series_create(buffer_size)
             return cls(cls.__create_key, observer_ptr)
 
-    def start_time_series(self, slave_index, value_reference, variable_type):
+    def start_time_series(self, slave_index: int, value_reference: int, variable_type: CosimVariableType):
         """
         Start observing a variable with a time series observer
 
@@ -142,13 +157,11 @@ class CosimObserver(Structure):
         :return: bool Successfully started observer
         """
         return (
-            self.__start_observing(
-                self.__ptr, slave_index, variable_type.value, value_reference
-            )
+            self.__start_observing(self.__ptr, slave_index, variable_type.value, value_reference)
             == CosimConstants.success
         )
 
-    def stop_time_series(self, slave_index, value_reference, variable_type):
+    def stop_time_series(self, slave_index: int, value_reference: int, variable_type: CosimVariableType):
         """
         Stop observing a variable with a time series observer
 
@@ -158,14 +171,12 @@ class CosimObserver(Structure):
         :return: bool Successfully stopped observer
         """
         return (
-            self.__stop_observing(
-                self.__ptr, slave_index, variable_type.value, value_reference
-            )
+            self.__stop_observing(self.__ptr, slave_index, variable_type.value, value_reference)
             == CosimConstants.success
         )
 
     def __time_series_samples(
-        self, slave_index, value_reference, sample_count, c_type, from_step
+        self, slave_index: int, value_reference: int, sample_count: int, c_type: Any, from_step: int
     ):
         """
         Helper function to avoid code duplication for time series sample retrieval
@@ -177,7 +188,7 @@ class CosimObserver(Structure):
         else:
             raise AssertionError("Invalid ctype")
         time_point_array = (c_int64 * sample_count)()
-        step_number_array = (c_longlong * sample_count)()
+        step_number_array = (c_int64 * sample_count)()
         samples_array = (c_type * sample_count)()
 
         real_samples = wrap_function(
@@ -187,10 +198,10 @@ class CosimObserver(Structure):
                 POINTER(CosimObserver),
                 c_int,
                 c_uint32,
-                c_longlong,
+                c_int64,
                 c_size_t,
                 c_type * sample_count,
-                c_longlong * sample_count,
+                c_int64 * sample_count,
                 c_int64 * sample_count,
             ],
             restype=c_int64,
@@ -221,9 +232,7 @@ class CosimObserver(Structure):
             samples_array[:step_count],
         )
 
-    def time_series_real_samples(
-        self, slave_index, value_reference, from_step, sample_count=10
-    ):
+    def time_series_real_samples(self, slave_index: int, value_reference: int, from_step: int, sample_count: int = 10):
         """
         Read real samples from time series observer
 
@@ -242,7 +251,7 @@ class CosimObserver(Structure):
         )
 
     def time_series_integer_samples(
-        self, slave_index, value_reference, from_step, sample_count=10
+        self, slave_index: int, value_reference: int, from_step: int, sample_count: int = 10
     ):
         """
         Read integer samples from time series observer
@@ -261,7 +270,7 @@ class CosimObserver(Structure):
             c_type=c_int,
         )
 
-    def __last_values(self, slave_index, variable_references, c_type):
+    def __last_values(self, slave_index: int, variable_references: list[int], c_type: Any):
         """ """
         if c_type == c_double:
             funcname = "cosim_observer_slave_get_real"
@@ -305,7 +314,7 @@ class CosimObserver(Structure):
             return value_array[:]
         raise AssertionError("Unable to return values. Check if indexes are valid.")
 
-    def last_real_values(self, slave_index, variable_references):
+    def last_real_values(self, slave_index: int, variable_references: list[int]):
         """
         Retrieve real values from slave with last value observer
 
@@ -319,7 +328,7 @@ class CosimObserver(Structure):
             c_type=c_double,
         )
 
-    def last_integer_values(self, slave_index, variable_references):
+    def last_integer_values(self, slave_index: int, variable_references: list[int]):
         """
         Retrieve integer values from slave with last value observer
 
@@ -333,7 +342,7 @@ class CosimObserver(Structure):
             c_type=c_int,
         )
 
-    def last_boolean_values(self, slave_index, variable_references):
+    def last_boolean_values(self, slave_index: int, variable_references: list[int]):
         """
         Retrieve boolean values from slave with last value observer
 
@@ -347,7 +356,7 @@ class CosimObserver(Structure):
             c_type=c_bool,
         )
 
-    def last_string_values(self, slave_index, variable_references):
+    def last_string_values(self, slave_index: int, variable_references: list[int]):
         """
         Retrieve string value from slave with last value observer
 

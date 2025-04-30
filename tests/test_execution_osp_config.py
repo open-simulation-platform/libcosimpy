@@ -3,7 +3,7 @@ from libcosimpy.CosimExecution import CosimExecution
 from libcosimpy.CosimEnums import CosimExecutionState, CosimErrorCode
 
 
-def test_from_osp_file(test_dir):
+def test_from_osp_file(test_dir: str):
     execution = CosimExecution.from_osp_config_file(osp_path=f"{test_dir}/data/msmi")
     execution_status = execution.execution_status
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
@@ -28,25 +28,25 @@ def test_from_osp_file(test_dir):
     }
 
 
-def test_from_osp_file_invalid(test_dir):
+def test_from_osp_file_invalid(test_dir: str):
     with raises(AssertionError) as e_info:
-        CosimExecution.from_osp_config_file(osp_path=f"{test_dir}/data/nonexisting")
+        _ = CosimExecution.from_osp_config_file(osp_path=f"{test_dir}/data/nonexisting")
         assert "path" in str(e_info.value)
 
 
 def test_from_osp_file_none():
     with raises(AttributeError) as e_info:
-        CosimExecution.from_osp_config_file(osp_path=None)
+        _ = CosimExecution.from_osp_config_file(osp_path=None)  # pyright: ignore
         assert "encode" in str(e_info.value)
 
 
 def test_from_osp_file_not_a_path():
     with raises(AssertionError) as e_info:
-        CosimExecution.from_osp_config_file(osp_path="not a valid path")
+        _ = CosimExecution.from_osp_config_file(osp_path="not a valid path")
         assert "path" in str(e_info.value)
 
 
 def test_from_osp_file_invalid_type():
     with raises(AttributeError) as e_info:
-        CosimExecution.from_osp_config_file(osp_path=0)
+        _ = CosimExecution.from_osp_config_file(osp_path=0)  # pyright: ignore
         assert "encode" in str(e_info.value)

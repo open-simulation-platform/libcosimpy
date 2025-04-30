@@ -10,17 +10,17 @@ from libcosimpy.CosimSlave import CosimLocalSlave
 
 def test_invalid_execution_creation():
     with raises(AssertionError) as e_info:
-        CosimExecution()
+        _ = CosimExecution()
         assert "initialized" in str(e_info.value)
 
 
 def test_invalid_create_key():
-    with raises(AssertionError) as e_info:
-        CosimExecution(create_key=object(), execution_ptr=None)
+    with raises(AssertionError):
+        _ = CosimExecution(create_key=object(), execution_ptr=None)
         assert "initialized"
 
 
-def test_num_slaves_and_variables(test_dir):
+def test_num_slaves_and_variables(test_dir: str):
     if platform() == "Windows":
         execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
         assert execution.num_slaves() == 2
@@ -32,7 +32,7 @@ def test_num_slaves_zero():
     assert execution.num_slaves() == 0
 
 
-def test_start(test_dir):
+def test_start(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.status()
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
@@ -42,7 +42,7 @@ def test_start(test_dir):
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.RUNNING
 
 
-def test_step(test_dir):
+def test_step(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.status()
     assert execution_status.current_time == 0.0
@@ -53,7 +53,7 @@ def test_step(test_dir):
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
 
 
-def test_simulate_until(test_dir):
+def test_simulate_until(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.status()
     assert execution_status.current_time == 0.0
@@ -64,7 +64,7 @@ def test_simulate_until(test_dir):
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
 
 
-def test_simulate_until_int(test_dir):
+def test_simulate_until_int(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.status()
     assert execution_status.current_time == 0.0
@@ -75,28 +75,28 @@ def test_simulate_until_int(test_dir):
     assert CosimExecutionState(execution_status.state) == CosimExecutionState.STOPPED
 
 
-def test_simulate_until_zero(test_dir):
+def test_simulate_until_zero(test_dir: str):
     with raises(AssertionError) as e_info:
         execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
         execution.simulate_until(target_time=0)
         assert "non-zero" in str(e_info.value)
 
 
-def test_simulate_until_none(test_dir):
+def test_simulate_until_none(test_dir: str):
     with raises(TypeError) as e_info:
         execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
-        execution.simulate_until(target_time=None)
+        execution.simulate_until(target_time=None)  # pyright: ignore
         assert "convertible" in str(e_info.value)
 
 
-def test_simulate_until_invalid(test_dir):
+def test_simulate_until_invalid(test_dir: str):
     with raises(ValueError) as e_info:
         execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
-        execution.simulate_until(target_time="non-valid")
+        execution.simulate_until(target_time="non-valid")  # pyright: ignore
         assert "convertible" in str(e_info.value)
 
 
-def test_running_state(test_dir):
+def test_running_state(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.status()
     assert execution_status.current_time == 0.0
@@ -111,7 +111,7 @@ def test_running_state(test_dir):
     assert execution_status.current_time != 0.0
 
 
-def test_real_time_simulation(test_dir):
+def test_real_time_simulation(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.status()
     assert not execution_status.is_real_time_simulation
@@ -123,7 +123,7 @@ def test_real_time_simulation(test_dir):
     assert not execution_status.is_real_time_simulation
 
 
-def test_real_time_factor_target(test_dir):
+def test_real_time_factor_target(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.status()
     assert execution_status.real_time_factor_target == 1.0
@@ -132,17 +132,17 @@ def test_real_time_factor_target(test_dir):
     assert execution_status.real_time_factor_target == 5.0
 
 
-def test_real_time_factor_target_zero(test_dir):
+def test_real_time_factor_target_zero(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     assert execution.real_time_factor_target(real_time_factor=0.0)
 
 
-def test_real_time_factor_target_invalid(test_dir):
+def test_real_time_factor_target_invalid(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     assert execution.real_time_factor_target(real_time_factor=-1.0) == 1
 
 
-def test_steps_to_monitor(test_dir):
+def test_steps_to_monitor(test_dir: str):
     execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
     execution_status = execution.status()
     assert execution_status.steps_to_monitor == 5
@@ -151,19 +151,17 @@ def test_steps_to_monitor(test_dir):
     assert execution_status.steps_to_monitor == 10
 
 
-def test_steps_to_monitor_zero(test_dir):
+def test_steps_to_monitor_zero(test_dir: str):
     with raises(AssertionError) as e_info:
         execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
         execution.steps_to_monitor(step_count=0)
         assert "non-zero" in str(e_info.value)
 
 
-def test_initial_value(test_dir):
+def test_initial_value(test_dir: str):
     execution = CosimExecution.from_step_size(0.1 * 1.0e9)
     print(f"{test_dir}/data/fmi1/identity.fmu")
-    local_slave = CosimLocalSlave(
-        fmu_path=f"{test_dir}/data/fmi1/identity.fmu", instance_name="Identity"
-    )
+    local_slave = CosimLocalSlave(fmu_path=f"{test_dir}/data/fmi1/identity.fmu", instance_name="Identity")
     slave_index = execution.add_local_slave(local_slave=local_slave)
     assert slave_index == 0
     variable_reference = 0
@@ -192,32 +190,28 @@ def test_initial_value(test_dir):
         value=string_value,
     )
     execution.step()
-    assert observer.last_real_values(
-        slave_index=slave_index, variable_references=[variable_reference]
-    ) == [real_value]
-    assert observer.last_integer_values(
-        slave_index=slave_index, variable_references=[variable_reference]
-    ) == [integer_value]
-    assert observer.last_boolean_values(
-        slave_index=slave_index, variable_references=[variable_reference]
-    ) == [boolean_value]
-    assert observer.last_string_values(
-        slave_index=slave_index, variable_references=[variable_reference]
-    ) == [string_value.encode()]
+    assert observer.last_real_values(slave_index=slave_index, variable_references=[variable_reference]) == [real_value]
+    assert observer.last_integer_values(slave_index=slave_index, variable_references=[variable_reference]) == [
+        integer_value
+    ]
+    assert observer.last_boolean_values(slave_index=slave_index, variable_references=[variable_reference]) == [
+        boolean_value
+    ]
+    assert observer.last_string_values(slave_index=slave_index, variable_references=[variable_reference]) == [
+        string_value.encode()
+    ]
 
 
-def test_slave_index_from_instance_name(test_dir):
+def test_slave_index_from_instance_name(test_dir: str):
     if platform() == "Windows":
         execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/ssp/demo")
         slave_index = execution.slave_index_from_instance_name("KnuckleBoomCrane")
         assert slave_index == 0
 
 
-def test_slave_variables(test_dir):
+def test_slave_variables(test_dir: str):
     execution = CosimExecution.from_step_size(0.1 * 1.0e9)
-    local_slave = CosimLocalSlave(
-        fmu_path=f"{test_dir}/data/fmi1/identity.fmu", instance_name="Identity"
-    )
+    local_slave = CosimLocalSlave(fmu_path=f"{test_dir}/data/fmi1/identity.fmu", instance_name="Identity")
     slave_index = execution.add_local_slave(local_slave=local_slave)
     variables = execution.slave_variables(slave_index=slave_index)
     assert len(variables) == 8

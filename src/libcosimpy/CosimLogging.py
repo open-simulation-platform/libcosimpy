@@ -18,7 +18,7 @@ class CosimLogLevel(Enum):
     FATAL = 5
 
 
-def log_output_level(log_level):
+def log_output_level(log_level: CosimLogLevel):
     """
     Sets the output log level of the libcosimc library
 

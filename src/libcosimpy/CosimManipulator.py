@@ -1,17 +1,26 @@
 from ctypes import (
-    Structure,
-    c_int64,
     POINTER,
-    c_int,
-    c_uint32,
-    c_size_t,
-    c_double,
+    Structure,
     c_bool,
     c_char_p,
+    c_double,
+    c_int,
+    c_int64,
+    c_size_t,
+    c_uint32,
 )
-from . import CosimLibrary
+from typing import TYPE_CHECKING, Optional, Any, Sequence
+
+from . import CosimConstants, CosimLibrary
+from .CosimEnums import CosimVariableType
 from ._internal import wrap_function
-from . import CosimConstants
+
+if TYPE_CHECKING:
+    from ctypes import _Pointer  # pyright: ignore[reportPrivateUsage]
+
+    CosimManipulatorPtr = _Pointer["CosimManipulator"]
+else:
+    CosimManipulatorPtr = POINTER("CosimManipulator")
 
 
 class CosimManipulator(Structure):
@@ -21,8 +30,9 @@ class CosimManipulator(Structure):
 
     # Key used to ensure the constructor can only be called from classmethods
     __create_key = object()
+    __ptr: Optional[CosimManipulatorPtr]
 
-    def __init__(self, create_key=None, manipulator_ptr=None):
+    def __init__(self, create_key: object = None, manipulator_ptr: Optional[CosimManipulatorPtr] = None):
         """
         Creates CosimManipulator from classmethod calls starting with .create
 
@@ -30,15 +40,14 @@ class CosimManipulator(Structure):
         :param POINTER(CosimManipulator) manipulator_ptr: Pointer to object created by classmethod
         :return: CosimManipulator object
         """
+        super().__init__()
+
         # Constructor should only be called using a classmethod
         assert create_key == CosimManipulator.__create_key, (
             "Manipulator can only be initialized using the Cosim.Manipulator.create"
         )
         # Store the pointer used by the C library
         self.__ptr = manipulator_ptr
-        """self.__is_scenario_running = wrap_function(lib=CosimLibrary.lib, funcname='cosim_scenario_is_running',
-                                                           argtypes=[POINTER(CosimManipulator)],
-                                                           restype=c_int)"""
         self.__abort = wrap_function(
             lib=CosimLibrary.lib,
             funcname="cosim_scenario_abort",
@@ -94,7 +103,9 @@ class CosimManipulator(Structure):
         """
         return self.__abort(self.__ptr) == CosimConstants.success
 
-    def __slave_values(self, slave_index, variable_references, values, c_type):
+    def __slave_values(
+        self, slave_index: int, variable_references: list[int], values: Sequence[int | float | bytes], c_type: Any
+    ):
         """
         Helper function to avoid code duplication for set last value
         """
@@ -128,13 +139,10 @@ class CosimManipulator(Structure):
         )
 
         return (
-            slave_values(
-                self.__ptr, slave_index, variable_array, variable_count, value_array
-            )
-            == CosimConstants.success
+            slave_values(self.__ptr, slave_index, variable_array, variable_count, value_array) == CosimConstants.success
         )
 
-    def slave_real_values(self, slave_index, variable_references, values):
+    def slave_real_values(self, slave_index: int, variable_references: list[int], values: Sequence[float]):
         """
         Set real variables in override manipulator
 
@@ -150,7 +158,7 @@ class CosimManipulator(Structure):
             c_type=c_double,
         )
 
-    def slave_integer_values(self, slave_index, variable_references, values):
+    def slave_integer_values(self, slave_index: int, variable_references: list[int], values: Sequence[int]):
         """
         Set integer variables in override manipulator
 
@@ -166,7 +174,7 @@ class CosimManipulator(Structure):
             c_type=c_int,
         )
 
-    def slave_boolean_values(self, slave_index, variable_references, values):
+    def slave_boolean_values(self, slave_index: int, variable_references: list[int], values: Sequence[bool]):
         """
         Set boolean variables in override manipulator
 
@@ -182,7 +190,7 @@ class CosimManipulator(Structure):
             c_type=c_bool,
         )
 
-    def slave_string_values(self, slave_index, variable_references, values):
+    def slave_string_values(self, slave_index: int, variable_references: list[int], values: Sequence[str]):
         """
         Set string variables in override manipulator
 
@@ -198,7 +206,7 @@ class CosimManipulator(Structure):
             c_type=c_char_p,
         )
 
-    def reset_variables(self, slave_index, variable_type, variable_references):
+    def reset_variables(self, slave_index: int, variable_type: CosimVariableType, variable_references: list[int]):
         """
         Reset variables set by override manipulator
 

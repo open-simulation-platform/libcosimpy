@@ -6,6 +6,7 @@ from ctypes import (
     Structure,
     c_double,
     c_int,
+    c_uint32,
 )
 from dataclasses import dataclass
 from typing import Optional
@@ -26,6 +27,7 @@ class EccoParams(Structure):
     """
     Ecco algorithm parameters. All parameters are in seconds.
     """
+
     safety_factor: float = 0.8
     step_size: float = 0.01
     min_step_size: float = 1e-4
@@ -61,6 +63,13 @@ class CosimAlgorithm(Structure):
         # Constructor should only be called using a classmethod
         assert create_key is CosimAlgorithm.__create_key, (
             "Execution can only be initialized using the CosimAlgorithm.create"
+        )
+
+        self.__ecco_add_power_bond = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_ecco_add_power_bond",
+            argtypes=[POINTER(CosimAlgorithm), c_int, c_uint32, c_uint32, c_int, c_uint32, c_uint32],
+            restype=c_int,
         )
 
     @classmethod
@@ -100,6 +109,35 @@ class CosimAlgorithm(Structure):
 
         return cls(cls.__create_key, ecco_algorithm_ptr)
 
+    def add_power_bond(
+        self,
+        slave1_index: int,
+        slave1_output_reference: int,
+        slave1_input_reference: int,
+        slave2_index: int,
+        slave2_output_reference: int,
+        slave2_input_reference: int,
+    ) -> int:
+        """
+        Creates a power bond between two instances of models
+
+        :param slave1_index: Slave index of the first model
+        :param slave1_output_reference: An output reference for the first model
+        :param slave1_input_reference: An input reference for the first model
+        :param slave2_index: Slave index of the second model
+        :param slave2_output_reference: An output reference for the second model
+        :param slave2_input_reference: An input reference for the second model
+        :return: 0 on Success and -1 on error
+        """
+        return self.__ecco_add_power_bond(
+            self.__ptr,
+            slave1_index,
+            slave1_output_reference,
+            slave1_input_reference,
+            slave2_index,
+            slave2_output_reference,
+            slave2_input_reference,
+        )
 
     @property
     def ptr(self) -> Optional[CosimAlgorithmPtr]:

@@ -10,10 +10,8 @@ try:
     else:
         lib = cdll.LoadLibrary(f"{lib_path}/libcosimc/libcosimc.so")
 except FileNotFoundError:
-    warnings.warn(
-        "Unable to load cosimc library, searching in the default search paths.."
-    )
+    warnings.warn("Unable to load cosimc library, searching in the default search paths..")
     if os.name == "nt":
-        lib = cdll.LoadLibrary(f"cosimc.dll")
+        lib = cdll.LoadLibrary("cosimc.dll")
     else:
-        lib = cdll.LoadLibrary(f"libcosimc.so")
+        lib = cdll.LoadLibrary("libcosimc.so")

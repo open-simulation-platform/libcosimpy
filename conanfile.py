@@ -1,6 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMakeDeps
-from conan.tools.files import copy, load, rename, rm
+from conan.tools.files import copy
 
 
 class LibCosimpyConanDependency(ConanFile):

@@ -1,24 +1,28 @@
+import typing
 from ctypes import (
-    Structure,
-    c_int,
     POINTER,
-    c_int64,
-    c_char_p,
+    Structure,
     c_bool,
+    c_char_p,
     c_double,
-    pointer,
+    c_int,
+    c_int64,
     c_size_t,
     c_uint32,
+    pointer,
 )
+from typing import Optional
 
-from .CosimAlgorithm import CosimAlgorithm
+from . import CosimConstants, CosimEnums, CosimLibrary, CosimManipulator, CosimObserver, CosimSlave
 from ._internal import wrap_function
-from . import CosimLibrary
-from . import CosimManipulator
-from . import CosimSlave
-from . import CosimObserver
-from . import CosimConstants
-from . import CosimEnums
+from .CosimAlgorithm import CosimAlgorithm
+
+if typing.TYPE_CHECKING:
+    from ctypes import _Pointer  # pyright: ignore[reportPrivateUsage]
+
+    CosimExecutionPtr = _Pointer["CosimExecution"]
+else:
+    CosimExecutionPtr = POINTER("CosimExecution")
 
 
 class CosimExecution(Structure):
@@ -27,9 +31,10 @@ class CosimExecution(Structure):
     """
 
     # Key used to ensure the constructor can only be called from classmethods
-    __create_key = object()
+    __create_key: object = object()
+    __ptr: Optional[CosimExecutionPtr] = None
 
-    def __init__(self, create_key=None, execution_ptr=None):
+    def __init__(self, create_key: object = None, execution_ptr: Optional[CosimExecutionPtr] = None):
         """
         Creates CosimObserver from classmethod calls starting with .from
 
@@ -37,6 +42,8 @@ class CosimExecution(Structure):
         :param POINTER(CosimExecution) execution_ptr: Pointer to object created by classmethod
         :return: CosimObserver object
         """
+        super().__init__()
+
         # Store the pointer used by the C library
         self.__ptr = execution_ptr
 
@@ -167,6 +174,13 @@ class CosimExecution(Structure):
             restype=c_int,
         )
 
+        self.__connect_real_variables = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_connect_real_variables",
+            argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_int, c_uint32],
+            restype=c_int,
+        )
+
     @classmethod
     def from_algorithm(cls, algorithm: CosimAlgorithm):
         """
@@ -188,7 +202,7 @@ class CosimExecution(Structure):
         return cls(cls.__create_key, execution_ptr)
 
     @classmethod
-    def from_step_size(cls, step_size):
+    def from_step_size(cls, step_size: int | float):
         """
         Creates empty execution based on step size
 
@@ -217,7 +231,7 @@ class CosimExecution(Structure):
         return cls(cls.__create_key, execution_ptr)
 
     @classmethod
-    def from_osp_config_file(cls, osp_path):
+    def from_osp_config_file(cls, osp_path: str):
         """
         Creates execution from OspSystemStructure.xml file
 
@@ -237,14 +251,12 @@ class CosimExecution(Structure):
 
         execution_ptr = osp_execution_create(encoded_osp_path, False, 0)
 
-        assert execution_ptr, (
-            "Unable to create execution from path. Please check if path is correct."
-        )
+        assert execution_ptr, "Unable to create execution from path. Please check if path is correct."
 
         return cls(cls.__create_key, execution_ptr)
 
     @classmethod
-    def from_ssp_file(cls, ssp_path, step_size=None):
+    def from_ssp_file(cls, ssp_path: str, step_size: Optional[int | float] = None):
         """
         Creates execution from SystemStructure.ssd file
 
@@ -281,13 +293,9 @@ class CosimExecution(Structure):
                 argtypes=[c_char_p, c_bool, c_int64, c_int64],
                 restype=POINTER(CosimExecution),
             )
-            execution_ptr = ssp_fixed_step_execution_create(
-                ssp_path.encode(), False, 0, step_size_int
-            )
+            execution_ptr = ssp_fixed_step_execution_create(ssp_path.encode(), False, 0, step_size_int)
 
-        assert execution_ptr, (
-            "Unable to create execution from path. Please check if path is correct."
-        )
+        assert execution_ptr, "Unable to create execution from path. Please check if path is correct."
 
         return cls(cls.__create_key, execution_ptr)
 
@@ -327,7 +335,7 @@ class CosimExecution(Structure):
         """
         return self.__stop(self.__ptr) == CosimConstants.success
 
-    def simulate_until(self, target_time):
+    def simulate_until(self, target_time: int | float):
         """
         Starts and automatically stops the simulation once target time is reached
 
@@ -344,14 +352,10 @@ class CosimExecution(Structure):
             except ValueError:
                 raise ValueError("Target time must be an int convertible")
 
-        assert target_time_int > 0, (
-            "Target time must be a positive and non-zero integer"
-        )
-        return (
-            self.__simulate_until(self.__ptr, target_time_int) != CosimConstants.failure
-        )
+        assert target_time_int > 0, "Target time must be a positive and non-zero integer"
+        return self.__simulate_until(self.__ptr, target_time_int) != CosimConstants.failure
 
-    def step(self, step_count=1):
+    def step(self, step_count: int = 1):
         """
         Advance the simulation for 1 or multiple steps
 
@@ -360,7 +364,7 @@ class CosimExecution(Structure):
         """
         return self.__multiple_steps(self.__ptr, step_count) == CosimConstants.success
 
-    def real_time_simulation_enabled(self, enabled=True):
+    def real_time_simulation_enabled(self, enabled: bool = True):
         """
         Enables or disables real time simulation for the execution
 
@@ -368,28 +372,20 @@ class CosimExecution(Structure):
         :return: bool Successfully set real time state to desired value
         """
         if enabled:
-            return (
-                self.__enable_real_time_simulation(self.__ptr) == CosimConstants.success
-            )
+            return self.__enable_real_time_simulation(self.__ptr) == CosimConstants.success
         else:
-            return (
-                self.__disable_real_time_simulation(self.__ptr)
-                == CosimConstants.success
-            )
+            return self.__disable_real_time_simulation(self.__ptr) == CosimConstants.success
 
-    def real_time_factor_target(self, real_time_factor):
+    def real_time_factor_target(self, real_time_factor: float):
         """
         Set custom real time factor target
 
         :param float real_time_factor: Real time factor
         :return: bool Successfully set real time factor
         """
-        return (
-            self.__real_time_factor_target(self.__ptr, float(real_time_factor))
-            == CosimConstants.success
-        )
+        return self.__real_time_factor_target(self.__ptr, float(real_time_factor)) == CosimConstants.success
 
-    def steps_to_monitor(self, step_count):
+    def steps_to_monitor(self, step_count: int):
         """
         Steps to monitor for rolling average real time factor measurement
 
@@ -400,19 +396,16 @@ class CosimExecution(Structure):
 
         return self.__steps_to_monitor(self.__ptr, step_count) == CosimConstants.success
 
-    def add_manipulator(self, manipulator):
+    def add_manipulator(self, manipulator: CosimManipulator.CosimManipulator):
         """
         Adds manipulator to execution
 
         :param CosimManipulator manipulator: Manipulator to be added
         :return: bool Successfully added manipulator to execution
         """
-        return (
-            self.__add_manipulator(self.__ptr, manipulator.ptr())
-            == CosimConstants.success
-        )
+        return self.__add_manipulator(self.__ptr, manipulator.ptr()) == CosimConstants.success
 
-    def add_observer(self, observer):
+    def add_observer(self, observer: CosimObserver.CosimObserver):
         """
         Add observer to execution
 
@@ -421,7 +414,7 @@ class CosimExecution(Structure):
         """
         return self.__add_observer(self.__ptr, observer.ptr()) == CosimConstants.success
 
-    def load_scenario(self, manipulator, scenario_file):
+    def load_scenario(self, manipulator: CosimManipulator.CosimManipulator, scenario_file: str):
         """
         Loads and executes scenario from file
 
@@ -434,10 +427,7 @@ class CosimExecution(Structure):
         except AttributeError:
             raise AttributeError("Unable to encode scenario path file")
 
-        return (
-            self.__load_scenario(self.__ptr, manipulator.ptr(), encoded_path)
-            == CosimConstants.success
-        )
+        return self.__load_scenario(self.__ptr, manipulator.ptr(), encoded_path) == CosimConstants.success
 
     def status(self):
         """
@@ -469,7 +459,7 @@ class CosimExecution(Structure):
         slave_infos(self.__ptr, slave_infos_list, slave_count)
         return slave_infos_list
 
-    def add_local_slave(self, local_slave):
+    def add_local_slave(self, local_slave: CosimSlave.CosimLocalSlave):
         """
         Add local slave to execution
 
@@ -478,7 +468,7 @@ class CosimExecution(Structure):
         """
         return self.__add_local_slave(self.__ptr, local_slave.ptr())
 
-    def slave_index_from_instance_name(self, instance_name):
+    def slave_index_from_instance_name(self, instance_name: str):
         """
         Returns the slave index from instance name or None if no slave with no slave with instance name was found
 
@@ -491,7 +481,7 @@ class CosimExecution(Structure):
                 return slave_info.index
         return None
 
-    def num_slave_variables(self, slave_index):
+    def num_slave_variables(self, slave_index: int):
         """
         Returns total number of variables for a slave
 
@@ -500,7 +490,7 @@ class CosimExecution(Structure):
         """
         return self.__slave_num_variables(self.__ptr, slave_index)
 
-    def slave_variables(self, slave_index):
+    def slave_variables(self, slave_index: int):
         """
         Return variable metadata form slave
 
@@ -508,9 +498,7 @@ class CosimExecution(Structure):
         :return: List of CosimSlaveVariableDescription variables of size num_slave_variables(slave_index)
         """
         slave_variables_count = self.num_slave_variables(slave_index)
-        slave_variables_list = (
-            CosimSlave.CosimSlaveVariableDescription * slave_variables_count
-        )()
+        slave_variables_list = (CosimSlave.CosimSlaveVariableDescription * slave_variables_count)()
         slave_variables = wrap_function(
             lib=CosimLibrary.lib,
             funcname="cosim_slave_get_variables",
@@ -522,12 +510,10 @@ class CosimExecution(Structure):
             ],
             restype=c_int,
         )
-        slave_variables(
-            self.__ptr, slave_index, slave_variables_list, slave_variables_count
-        )
+        slave_variables(self.__ptr, slave_index, slave_variables_list, slave_variables_count)
         return slave_variables_list
 
-    def real_initial_value(self, slave_index, variable_reference, value):
+    def real_initial_value(self, slave_index: int, variable_reference: int, value: float):
         """
         Set initial value for variable of type real
 
@@ -536,12 +522,9 @@ class CosimExecution(Structure):
         :param float value: Value to be set as initial value
         :return: bool Successfully set initial value
         """
-        return (
-            self.__real_initial(self.__ptr, slave_index, variable_reference, value)
-            == CosimConstants.success
-        )
+        return self.__real_initial(self.__ptr, slave_index, variable_reference, value) == CosimConstants.success
 
-    def integer_initial_value(self, slave_index, variable_reference, value):
+    def integer_initial_value(self, slave_index: int, variable_reference: int, value: int):
         """
         Set initial value for variable of type integer
 
@@ -550,12 +533,9 @@ class CosimExecution(Structure):
         :param int value: Value to be set as initial value
         :return: bool Successfully set initial value
         """
-        return (
-            self.__integer_initial(self.__ptr, slave_index, variable_reference, value)
-            == CosimConstants.success
-        )
+        return self.__integer_initial(self.__ptr, slave_index, variable_reference, value) == CosimConstants.success
 
-    def boolean_initial_value(self, slave_index, variable_reference, value):
+    def boolean_initial_value(self, slave_index: int, variable_reference: int, value: bool):
         """
         Set initial value for variable of type boolean
 
@@ -564,12 +544,9 @@ class CosimExecution(Structure):
         :param bool value: Value to be set as initial value
         :return: bool Successfully set initial value
         """
-        return (
-            self.__boolean_initial(self.__ptr, slave_index, variable_reference, value)
-            == CosimConstants.success
-        )
+        return self.__boolean_initial(self.__ptr, slave_index, variable_reference, value) == CosimConstants.success
 
-    def string_initial_value(self, slave_index, variable_reference, value):
+    def string_initial_value(self, slave_index: int, variable_reference: int, value: str):
         """
         Set initial value for variable of type string
 
@@ -579,10 +556,22 @@ class CosimExecution(Structure):
         :return: bool Successfully set initial value
         """
         return (
-            self.__string_initial(
-                self.__ptr, slave_index, variable_reference, value.encode()
-            )
-            == CosimConstants.success
+            self.__string_initial(self.__ptr, slave_index, variable_reference, value.encode()) == CosimConstants.success
+        )
+
+    def connect_real_variables(
+        self,
+        output_slave_index: int,
+        output_variable_reference: int,
+        input_slave_index: int,
+        input_variable_reference: int,
+    ) -> int:
+        return self.__connect_real_variables(
+            self.__ptr,
+            output_slave_index,
+            output_variable_reference,
+            input_slave_index,
+            input_variable_reference,
         )
 
     def __del__(self):

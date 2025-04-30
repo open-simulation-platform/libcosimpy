@@ -6,11 +6,9 @@ from libcosimpy.CosimEnums import CosimVariableType
 from platform import platform
 
 
-def test_from_override_set(test_dir):
+def test_from_override_set(test_dir: str):
     execution = CosimExecution.from_step_size(0.1 * 1.0e9)
-    local_slave = CosimLocalSlave(
-        fmu_path=f"{test_dir}/data/fmi1/identity.fmu", instance_name="Identity"
-    )
+    local_slave = CosimLocalSlave(fmu_path=f"{test_dir}/data/fmi1/identity.fmu", instance_name="Identity")
     execution.add_local_slave(local_slave=local_slave)
     manipulator = CosimManipulator.create_override()
     assert execution.add_manipulator(manipulator=manipulator)
@@ -43,27 +41,16 @@ def test_from_override_set(test_dir):
         values=string_values,
     )
     execution.step()
+    assert observer.last_real_values(slave_index=slave_index, variable_references=variable_references) == real_values
     assert (
-        observer.last_real_values(
-            slave_index=slave_index, variable_references=variable_references
-        )
-        == real_values
+        observer.last_integer_values(slave_index=slave_index, variable_references=variable_references) == integer_values
     )
     assert (
-        observer.last_integer_values(
-            slave_index=slave_index, variable_references=variable_references
-        )
-        == integer_values
+        observer.last_boolean_values(slave_index=slave_index, variable_references=variable_references) == boolean_values
     )
-    assert (
-        observer.last_boolean_values(
-            slave_index=slave_index, variable_references=variable_references
-        )
-        == boolean_values
-    )
-    assert observer.last_string_values(
-        slave_index=slave_index, variable_references=variable_references
-    ) == [sv.encode() for sv in string_values]
+    assert observer.last_string_values(slave_index=slave_index, variable_references=variable_references) == [
+        sv.encode() for sv in string_values
+    ]
 
     assert manipulator.reset_variables(
         slave_index=slave_index,
@@ -86,21 +73,15 @@ def test_from_override_set(test_dir):
         variable_references=variable_references,
     )
     execution.step()
-    assert observer.last_real_values(
-        slave_index=slave_index, variable_references=variable_references
-    ) == [0.0]
-    assert observer.last_integer_values(
-        slave_index=slave_index, variable_references=variable_references
-    ) == [0]
-    assert observer.last_boolean_values(
-        slave_index=slave_index, variable_references=variable_references
-    ) == [False]
-    assert observer.last_string_values(
-        slave_index=slave_index, variable_references=variable_references
-    ) == ["".encode()]
+    assert observer.last_real_values(slave_index=slave_index, variable_references=variable_references) == [0.0]
+    assert observer.last_integer_values(slave_index=slave_index, variable_references=variable_references) == [0]
+    assert observer.last_boolean_values(slave_index=slave_index, variable_references=variable_references) == [False]
+    assert observer.last_string_values(slave_index=slave_index, variable_references=variable_references) == [
+        "".encode()
+    ]
 
 
-def test_from_override_set_multiple(test_dir):
+def test_from_override_set_multiple(test_dir: str):
     if platform() == "Windows":
         execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/dp-ship")
         manipulator = CosimManipulator.create_override()
@@ -117,9 +98,7 @@ def test_from_override_set_multiple(test_dir):
         )
         execution.step()
         assert (
-            observer.last_real_values(
-                slave_index=slave_index, variable_references=real_variable_references
-            )
+            observer.last_real_values(slave_index=slave_index, variable_references=real_variable_references)
             == real_values
         )
         assert manipulator.reset_variables(
@@ -128,12 +107,14 @@ def test_from_override_set_multiple(test_dir):
             variable_references=real_variable_references,
         )
         execution.step()
-        assert observer.last_real_values(
-            slave_index=slave_index, variable_references=real_variable_references
-        ) == [0.0, 0.0, 0.0]
+        assert observer.last_real_values(slave_index=slave_index, variable_references=real_variable_references) == [
+            0.0,
+            0.0,
+            0.0,
+        ]
 
 
-def test_load_scenario(test_dir):
+def test_load_scenario(test_dir: str):
     if platform() == "Windows":
         execution = CosimExecution.from_ssp_file(ssp_path=f"{test_dir}/data/dp-ship")
         manipulator = CosimManipulator.create_scenario_manager()
