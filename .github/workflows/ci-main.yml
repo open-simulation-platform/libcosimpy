@@ -23,11 +23,12 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
-      - name: 'Run test'
-        run: |
-          uv sync
-          uv run ruff format --diff
-          uv run ruff check --diff
+      - name: Install dependencies
+        run: uv sync
+      - name: Run ruff format
+        run: uv run ruff format --diff
+      - name: Run ruff check
+        run: uv run ruff check --diff
 
   test:
     name: Tests

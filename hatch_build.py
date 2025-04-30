@@ -13,7 +13,7 @@ class WheelHook(BuildHookInterface):
         system_os = platform.system()
         os.system("conan remote add osp https://osp.jfrog.io/artifactory/api/conan/conan-local --force --index 0")
         os.system("conan profile detect --force")
-        os.system("conan install --requires=cmake/[\"3.15>= <4.0\"]")
+        os.system("conan install --requires=cmake/[\">=3.15 <4.0\"]")
         os.system("conan install -u -b missing -of build .")
         if system_os == "Linux":
             os.system("patchelf --set-rpath '$ORIGIN' build/libcosimc/*")
