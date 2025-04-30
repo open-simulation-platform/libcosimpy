@@ -5,7 +5,7 @@ from conan.tools.files import copy
 class LibCosimpyConanDependency(ConanFile):
     name = "libcosimpy-recipe"
     requires = "libcosimc/0.11.0@osp/testing-ecco-update"
-    tool_requires = "cmake/[<4.0,>=3.15]"
+    tool_requires = "cmake/[<4.0.0 >=3.15]"
     default_options = {
         "libcosim/*:proxyfmu": True,
     }
