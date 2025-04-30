@@ -181,6 +181,13 @@ class CosimExecution(Structure):
             restype=c_int,
         )
 
+        self.__connect_int_variables = wrap_function(
+            lib=CosimLibrary.lib,
+            funcname="cosim_execution_connect_integer_variables",
+            argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_int, c_uint32],
+            restype=c_int,
+        )
+
     @classmethod
     def from_algorithm(cls, algorithm: CosimAlgorithm):
         """
@@ -566,7 +573,36 @@ class CosimExecution(Structure):
         input_slave_index: int,
         input_variable_reference: int,
     ) -> int:
+        """
+        Connect two real variables between models
+        :param int output_slave_index: Index of the slave that writes an output
+        :param int output_variable_reference: Index of the output variable
+        :param int input_slave_index: Index of the slave that reads an input
+        :param int input_variable_reference: Index of the input variable
+        """
         return self.__connect_real_variables(
+            self.__ptr,
+            output_slave_index,
+            output_variable_reference,
+            input_slave_index,
+            input_variable_reference,
+        )
+
+    def connect_integer_variables(
+            self,
+            output_slave_index: int,
+            output_variable_reference: int,
+            input_slave_index: int,
+            input_variable_reference: int,
+    ) -> int:
+        """
+        Connect two integer variables between models
+        :param int output_slave_index: Index of the slave that writes an output
+        :param int output_variable_reference: Index of the output variable
+        :param int input_slave_index: Index of the slave that reads an input
+        :param int input_variable_reference: Index of the input variable
+        """
+        return self.__connect_integer_variables(
             self.__ptr,
             output_slave_index,
             output_variable_reference,
