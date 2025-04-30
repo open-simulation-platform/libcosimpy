@@ -6,29 +6,26 @@ on: [push, workflow_dispatch]
 jobs:
   code_quality:
     name: Code Quality
-    runs-on: ${{ matrix.platform }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [ 'windows-latest', 'ubuntu-latest' ]
-        python-version: [ '3.10', '3.11', '3.12' ]
+    runs-on: 'ubuntu-latest'
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version-file: 'pyproject.toml'
       - name: Install uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --no-install-project
       - name: Run ruff format
-        run: uv run ruff format --diff
+        run: uv run --no-project ruff format --diff
       - name: Run ruff check
-        run: uv run ruff check --diff
+        run: uv run --no-project ruff check --diff
+      - name: Run pyright
+        run: uv run --no-project pyright
 
   test:
     name: Tests
@@ -45,14 +42,26 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
-      - name: 'Run test'
-        run: |
-          uv sync
-          uv run --with pytest pytest --cov
+      - name: Cache conan
+        id: cache-conan
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: ${{ runner.os }}-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}
+
+      - name: 'Build wheel'
+        run: uv build --wheel
+      - name: Copy libcosimc
+        run: cp -r build/libcosimc src/libcosimpy
+        shell: bash
+      - name: Run test
+        run: uv run --with pytest pytest
 
   build_wheels:
     name: Build wheels
@@ -73,10 +82,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.11
+      - name: Cache conan
+        id: cache-conan
+        uses: actions/cache@v4
+        with:
+          path: /.conan2
+          key: cibuildwheel-${{ runner.os }}-${{ github.ref_name }}
+          restore-keys: |
+            cibuildwheel-${{ runner.os }}-${{ github.ref_name }}
+            cibuildwheel-${{ runner.os }}
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.19.2
+        uses: pypa/cibuildwheel@v2.23.3
         env:
           CIBW_BUILD: "${{ matrix.python-version }}-win_amd64 ${{ matrix.python-version }}-manylinux_x86_64"
+          CIBW_BUILD_FRONTEND: build[uv]
+          CONAN_HOME: /host/.conan2
       - name: Twine check
         run: | 
            pip install twine
@@ -97,7 +117,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build source
-        run: | 
+        run: |
           pip install build twine
           python -m build --sdist
           twine check --strict ./dist/*
@@ -120,7 +140,7 @@ jobs:
          pattern: "*-wheel"
          merge-multiple: true
          path: ./dist/
-     - uses: pypa/gh-action-pypi-publish@v1.9.0
+     - uses: pypa/gh-action-pypi-publish@release/v1
        with:
          user: __token__
          password: ${{ secrets.PYPI_API_TOKEN }}

@@ -197,7 +197,7 @@ class CosimExecution(Structure):
         """
         execution_create = wrap_function(
             lib=CosimLibrary.lib,
-            funcname="cosim_execution_create_v2",
+            funcname="cosim_execution_create_with_algorithm",
             argtypes=[c_int64, POINTER(CosimAlgorithm)],
             restype=POINTER(CosimExecution),
         )
@@ -589,11 +589,11 @@ class CosimExecution(Structure):
         )
 
     def connect_integer_variables(
-            self,
-            output_slave_index: int,
-            output_variable_reference: int,
-            input_slave_index: int,
-            input_variable_reference: int,
+        self,
+        output_slave_index: int,
+        output_variable_reference: int,
+        input_slave_index: int,
+        input_variable_reference: int,
     ) -> int:
         """
         Connect two integer variables between models

@@ -13,5 +13,6 @@ class LibCosimpyConanDependency(ConanFile):
         for dep in self.dependencies.values():
             for dep_bin_dir in dep.cpp_info.bindirs:
                 copy(self, "*.dll", src=dep_bin_dir, dst="libcosimc", keep_path=False)
-                copy(self, "*.so.*", src=dep_bin_dir, dst="libcosimc", keep_path=False)
-                copy(self, "*.so", src=dep_bin_dir, dst="libcosimc", keep_path=False)
+            for dep_lib_dir in dep.cpp_info.libdirs:
+                copy(self, "*.so.*", src=dep_lib_dir, dst="libcosimc", keep_path=False)
+                copy(self, "*.so", src=dep_lib_dir, dst="libcosimc", keep_path=False)
