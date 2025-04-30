@@ -52,7 +52,7 @@ jobs:
       - name: 'Run test'
         run: |
           uv sync
-          uv run --with pytest
+          uv run --with pytest pytest --cov
 
   build_wheels:
     name: Build wheels
