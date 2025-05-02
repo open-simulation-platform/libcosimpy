@@ -89,7 +89,6 @@ jobs:
           path: /.conan2
           key: cibuildwheel-${{ runner.os }}-${{ github.ref_name }}
           restore-keys: |
-            cibuildwheel-${{ runner.os }}-${{ github.ref_name }}
             cibuildwheel-${{ runner.os }}
       - name: Install uv
         uses: astral-sh/setup-uv@v6
