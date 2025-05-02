@@ -58,7 +58,6 @@ before-all = "yum install -y libatomic"
 
 [tool.cibuildwheel]
 build = "*-manylinux_x86_64 *-win_amd64"
-before-build = "pip install uv"
 
 [tool.pyright]
 stubPath = "stubs"
