@@ -53,11 +53,13 @@ dependencies = [
 [tool.hatch.build.targets.wheel.force-include]
 "build/libcosimc" = "src/libcosimpy/libcosimc"
 
-[tool.cibuildwheel.linux]
-before-all = "yum install -y libatomic"
-
 [tool.cibuildwheel]
 build = "*-manylinux_x86_64 *-win_amd64"
+build-frontend = "build[uv]"
+
+[tool.cibuildwheel.linux]
+before-all = "yum install -y libatomic"
+manylinux-x86_64-image = "manylinux2014"
 
 [tool.pyright]
 stubPath = "stubs"

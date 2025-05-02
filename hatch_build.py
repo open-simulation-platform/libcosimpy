@@ -9,6 +9,8 @@ class WheelHook(BuildHookInterface):
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         super().initialize(version, build_data)
         system_os = platform.system()
+        build_data["infer_tag"] = True
+        build_data["pure_python"] = False
         os.system("conan remote add osp https://osp.jfrog.io/artifactory/api/conan/conan-local --force")
         os.system("conan profile detect --force")
         assert os.system("conan install . -u -b missing -of build") == 0, "Conan install failed"
