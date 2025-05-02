@@ -49,7 +49,6 @@ jobs:
       - name: Cache conan
         id: cache-conan
         uses: actions/cache@v4
-        if: ${{ runner.os != 'Windows' }}
         with:
           path: ~/.conan2
           key: ${{ runner.os }}-${{ github.ref_name }}
