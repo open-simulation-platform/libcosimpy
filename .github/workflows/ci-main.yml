@@ -100,7 +100,8 @@ jobs:
         env:
           CIBW_BUILD: "${{ matrix.python-version }}-win_amd64 ${{ matrix.python-version }}-manylinux_x86_64"
           CIBW_BUILD_FRONTEND: build[uv]
-          CONAN_HOME: /host/.conan2
+          CIBW_ENVIRONMENT_LINUX: "CONAN_HOME=/host/.conan2"
+          CIBW_ENVIRONMENT_WINDOWS: "CONAN_HOME=/.conan2"
       - name: Twine check
         run: | 
            pip install twine
