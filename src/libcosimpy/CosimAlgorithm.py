@@ -25,7 +25,10 @@ else:
 @dataclass
 class EccoParams(Structure):
     """
-    Ecco algorithm parameters. All parameters are in seconds.
+    Ecco algorithm parameters. See [1] for their detailed descriptions.
+
+    [1] Sadjina, S. and Pedersen, E., 2020. Energy conservation and coupling error reduction in non-iterative
+    co-simulations. Engineering with Computers, 36, pp.1579-1587
     """
 
     safety_factor: float = 0.8

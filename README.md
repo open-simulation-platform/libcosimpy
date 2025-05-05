@@ -149,6 +149,110 @@ execution.step()
 
 Scenario manipulators are also supported
 
+# Using ECCO algorithm
+
+Libcosimpy supports ECCO (Energy-Conservation-based Co-Simulation) algorithm based on the work in [1] for adaptively
+updating the step size of the simulation. The algorithm uses the law of conservation of energy between FMU models that
+represent power bonds from bond graph theory. 
+
+## Creating ECCO algorithm manually
+The parameters of the algorithm can be specified via the `EccoParam` class:
+
+```python
+params = EccoParams(
+    safety_factor=0.8,
+    step_size=1e-4,
+    min_step_size=1e-4,
+    max_step_size=0.01,
+    min_change_rate=0.2,
+    max_change_rate=1.5,
+    abs_tolerance=1e-4,
+    rel_tolerance=1e-4,
+    p_gain=0.2,
+    i_gain=0.15,
+)
+```
+
+The algorithm be created via `create_ecco_algorithm`, which can be used to create a new execution instance:
+
+```python
+# Create an algorithm instance
+ecco_algorithm = CosimAlgorithm.create_ecco_algorithm(params)
+
+# Create execution
+execution = CosimExecution.from_algorithm(ecco_algorithm)
+```
+
+The power bond between models is represented by input and output connection pair between two models:
+
+```python
+# Indicating a power bond between models (indicated by index chassis_index and wheel_index)
+ecco_algorithm.add_power_bond(
+    chassis_index,
+    chassis_v_out,
+    chassis_f_in,
+    wheel_index,
+    wheel_f_out,
+    wheel_v_in,
+)
+```
+
+The simulation is started as usual via `simulate_until` function from `CosimExecution`:
+```python
+execution.simulate_until(target_time=10e9)
+```
+
+See [test_ecco_algorithm](tests/test_ecco_algorithm.py) for detailed usage of ECCO algorithm.
+
+## Creating ECCO algorithm via system structure file
+
+Alternatively, ECCO algorithm can also be created via system structure file:
+```xml
+<OspSystemStructure xmlns="http://opensimulationplatform.com/MSMI/OSPSystemStructure" version="0.1">
+    ...
+    <!-- Specify ecco algorithm -->
+    <Algorithm>ecco</Algorithm>
+    ...
+    <Connections>
+        <!-- Annotate variable connection as power bond via `powerBond` attribute. Specify
+             causality of the variable (input or output) -->
+        <VariableConnection powerBond="wheelchassis">
+            <Variable simulator="chassis" name="velocity" causality="input"/>
+            <Variable simulator="wheel" name="in_vel" causality="output"/>
+        </VariableConnection>
+        <VariableConnection powerBond="wheelchassis">
+            <Variable simulator="wheel" name="out_spring_damper_f" causality="input"/>
+            <Variable simulator="chassis" name="force" causality="output"/>
+        </VariableConnection>
+    </Connections>
+    <!-- Specify ecco algorithm parameters -->
+    <EccoConfiguration>
+        <SafetyFactor>0.99</SafetyFactor>
+        <StepSize>0.0001</StepSize>
+        <MinimumStepSize>0.00001</MinimumStepSize>
+        <MaximumStepSize>0.01</MaximumStepSize>
+        <MinimumChangeRate>0.2</MinimumChangeRate>
+        <MaximumChangeRate>1.5</MaximumChangeRate>
+        <ProportionalGain>0.2</ProportionalGain>
+        <IntegralGain>0.15</IntegralGain>
+        <RelativeTolerance>1e-6</RelativeTolerance>
+        <AbsoluteTolerance>1e-6</AbsoluteTolerance>
+    </EccoConfiguration>
+</OspSystemStructure>
+```
+
+Then this file can be loaded via a usual way via `CosimExecution.from_osp_config_file`:
+```python
+execution = CosimExecution.from_osp_config_file(osp_path="tests/data/fmi2/quarter_truck")
+```
+
+See [Quarter truck example](tests/data/fmi2/quarter_truck/OspSystemStructure.xml) for detailed usage of ECCO algorithm via system structure file.
+
+
+## Reference
+[1] Sadjina, S. and Pedersen, E., 2020. Energy conservation and coupling error reduction in non-iterative co-simulations. Engineering with Computers, 36, pp.1579-1587.
+
+
 # Tests
 
 Tests can be run using the `pytest` command in the terminal. `libcosimc` log level for all tests can be set in the `./tests/conftest.py` file.
