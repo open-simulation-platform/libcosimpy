@@ -59,7 +59,7 @@ build-frontend = "build[uv]"
 
 [tool.cibuildwheel.linux]
 before-all = "yum install -y libatomic"
-manylinux-x86_64-image = "manylinux2014"
+manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.pyright]
 stubPath = "stubs"
