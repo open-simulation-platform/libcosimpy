@@ -56,6 +56,7 @@ dependencies = [
 [tool.cibuildwheel]
 build = "*-manylinux_x86_64 *-win_amd64"
 build-frontend = "build[uv]"
+test-command = "uv run --with pytest pytest {package}"
 
 [tool.cibuildwheel.linux]
 before-all = [
