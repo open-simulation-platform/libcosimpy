@@ -78,6 +78,7 @@ jobs:
     timeout-minutes: 35
     env:
       CONAN_REVISIONS_ENABLED: 1
+      CONAN_HOME: /.conan2
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
@@ -87,7 +88,7 @@ jobs:
         id: cache-conan
         uses: actions/cache@v4
         with:
-          path: /.conan2
+          path: ${{ env.CONAN_HOME }}
           key: cibuildwheel-${{ runner.os }}-${{ github.ref_name }}
           restore-keys: |
             cibuildwheel-${{ runner.os }}-master
@@ -102,8 +103,11 @@ jobs:
         env:
           CIBW_BUILD: "${{ matrix.python-version }}-win_amd64 ${{ matrix.python-version }}-manylinux_x86_64"
           CIBW_BUILD_FRONTEND: build[uv]
-          CIBW_ENVIRONMENT_LINUX: "CONAN_HOME=/host/.conan2"
-          CIBW_ENVIRONMENT_WINDOWS: "CONAN_HOME=/.conan2"
+          CIBW_ENVIRONMENT_LINUX: "CONAN_HOME=/host/${{ env.CONAN_HOME }}"
+          CIBW_ENVIRONMENT_WINDOWS: "CONAN_HOME=${{ env.CONAN_HOME }}"
+          CONAN_LOGIN_USERNAME_OSP: ${{ secrets.osp_artifactory_usr }}
+          CONAN_PASSWORD_OSP: ${{ secrets.osp_artifactory_pwd }}
+          CONAN_UPLOAD_OSP: 1
       - name: Twine check
         run: | 
            pip install twine
