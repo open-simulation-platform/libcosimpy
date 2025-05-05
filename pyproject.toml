@@ -60,7 +60,7 @@ build-frontend = "build[uv]"
 [tool.cibuildwheel.linux]
 before-all = [
     "yum install -y libatomic",
-    "yum install -y perl-IPC-Cmd",
+    "yum install -y perl-IPC-Cmd perl-Digest-SHA",
 ]
 manylinux-x86_64-image = "manylinux_2_28"
 
