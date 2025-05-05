@@ -93,9 +93,10 @@ jobs:
         env:
           CIBW_BUILD: "${{ matrix.python-version }}-win_amd64 ${{ matrix.python-version }}-manylinux_x86_64"
           CIBW_BUILD_FRONTEND: build[uv]
-          CONAN_LOGIN_USERNAME_OSP: ${{ secrets.osp_artifactory_usr }}
-          CONAN_PASSWORD_OSP: ${{ secrets.osp_artifactory_pwd }}
-          CONAN_UPLOAD_OSP: 1
+          CIBW_ENVIRONMENT: >
+            CONAN_UPLOAD_OSP: 1
+            CONAN_LOGIN_USERNAME_OSP=${{ secrets.osp_artifactory_usr }}
+            CONAN_PASSWORD_OSP=${{ secrets.osp_artifactory_pwd }}
       - name: Twine check
         run: | 
            pip install twine
