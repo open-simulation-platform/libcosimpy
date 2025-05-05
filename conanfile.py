@@ -4,7 +4,7 @@ from conan.tools.files import copy
 
 class LibCosimpyConanDependency(ConanFile):
     name = "libcosimpy-recipe"
-    requires = "libcosimc/0.11.0@osp/testing-ecco-update"
+    requires = "libcosimc/0.11.0@osp/testing-string_boolean_connect_variables"
     default_options = {
         "libcosim/*:proxyfmu": True,
     }
