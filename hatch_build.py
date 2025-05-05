@@ -1,4 +1,5 @@
-from typing import Any
+from typing import Any, Optional
+import inspect
 import os
 import platform
 
@@ -8,11 +9,26 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 class WheelHook(BuildHookInterface):
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         super().initialize(version, build_data)
+        config_settings: Optional[dict[str, Any]] = None
         system_os = platform.system()
         build_data["infer_tag"] = True
         build_data["pure_python"] = False
+
         os.system("conan remote add osp https://osp.jfrog.io/artifactory/api/conan/conan-local --force --index 0")
         os.system("conan profile detect --force")
-        assert os.system("conan install . -u -b missing -of build") == 0, "Conan install failed"
+
+        for frame_info in inspect.stack():
+            frame = frame_info.frame
+            module = inspect.getmodule(frame)
+            if module and module.__name__.startswith("hatchling.build") and "config_settings" in frame.f_locals:
+                config_settings = frame.f_locals["config_settings"]
+
+        package_list = config_settings.get("CONAN_BUILD")
+        if package_list:
+            build_packages = " ".join([f"-b {p}/*" for p in package_list.split(",")])
+        else:
+            build_packages = "-b missing"
+
+        assert os.system(f"conan install . -u {build_packages} -of build") == 0, "Conan install failed"
         if system_os == "Linux":
             os.system("patchelf --set-rpath '$ORIGIN' build/libcosimc/*")
