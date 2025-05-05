@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 import inspect
 import os
 import platform
@@ -9,7 +9,7 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 class WheelHook(BuildHookInterface):
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         super().initialize(version, build_data)
-        config_settings: Optional[dict[str, Any]] = None
+        config_settings: dict[str, Any] = {}
         system_os = platform.system()
         build_data["infer_tag"] = True
         build_data["pure_python"] = False
