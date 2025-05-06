@@ -27,8 +27,8 @@ jobs:
       - name: Run pyright
         run: uv run --no-project pyright
 
-  build_wheels:
-    name: Build wheels
+  build_wheels_run_tests:
+    name: Build wheels and run tests
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -92,7 +92,7 @@ jobs:
    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
    needs:
      - code_quality
-     - build_wheels
+     - build_wheels_run_tests
      - build_source
    runs-on: ubuntu-latest
    steps:
