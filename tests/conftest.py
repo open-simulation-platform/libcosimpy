@@ -1,6 +1,5 @@
 from libcosimpy.CosimLogging import log_output_level, CosimLogLevel
 import shutil
-import os
 import pytest
 from os.path import dirname as d
 from os.path import abspath
@@ -10,9 +9,9 @@ log_output_level(CosimLogLevel.FATAL)
 
 # Clear content of test log folder
 try:
-    shutil.rmtree(r'./tests/log')
+    shutil.rmtree(r"./tests/log")
 except OSError as e:
-    print("Error: %s : %s" % (r'./tests/log', e.strerror))
+    print("Error: %s : %s" % (r"./tests/log", e.strerror))
 
 
 @pytest.fixture(scope="module")

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling~=1.13"]
 build-backend = "hatchling.build"
 
 [project]
@@ -13,20 +13,28 @@ maintainers = [
 ]
 description = "Python wrapper for the libcosim library"
 readme = "README.md"
-requires-python = ">=3.8, <3.13"
+requires-python = ">=3.10, <3.14"
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux"
 ]
+
 [project.urls]
 "Homepage" = "https://github.com/open-simulation-platform/libcosimpy"
+
+[dependency-groups]
+dev = [
+    "conan~=2.15.1",
+    "ruff~=0.11.7",
+    "pyright>=1.1.400",
+    "pytest>=8.3.5",
+]
 
 # Hatch configurations
 [tool.hatch.version]
@@ -37,15 +45,126 @@ exclude = ["tests", ".github"]
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 dependencies = [
-    "conan==1.64.0",
+    "conan~=2.15.1",
+    "hatchling~=1.13",
+    "cmake>=3.10,<4.0",
     "patchelf>=0.17.2; platform_system == 'Linux'"
 ]
 
 [tool.hatch.build.targets.wheel.force-include]
 "build/libcosimc" = "src/libcosimpy/libcosimc"
 
-[tool.cibuildwheel.linux]
-before-all = "yum install -y libatomic"
-
 [tool.cibuildwheel]
 build = "*-manylinux_x86_64 *-win_amd64"
+build-frontend = "build[uv]"
+test-command = "uv run --with pytest pytest {package}"
+
+[tool.cibuildwheel.linux]
+before-all = [
+    "yum install -y libatomic",
+    "yum install -y perl-IPC-Cmd perl-Digest-SHA",
+]
+manylinux-x86_64-image = "manylinux_2_28"
+
+[tool.pyright]
+stubPath = "stubs"
+include = [
+    "src",
+    "tests",
+    "demos",
+]
+exclude = [
+]
+ignore = [
+    "conanfile.py",
+    "hatch_build.py",
+]
+
+typeCheckingMode = "basic"
+useLibraryCodeForTypes = true
+reportMissingParameterType = "error"
+reportUnknownParameterType = "warning"
+reportUnknownMemberType = false
+reportMissingTypeArgument = "error"
+reportPropertyTypeMismatch = "error"
+reportFunctionMemberAccess = "warning"
+reportPrivateUsage = "warning"
+reportTypeCommentUsage = "warning"
+reportIncompatibleMethodOverride = "warning"
+reportIncompatibleVariableOverride = "error"
+reportInconsistentConstructor = "error"
+reportOverlappingOverload = "warning"
+reportUninitializedInstanceVariable = "warning"
+reportCallInDefaultInitializer = "warning"
+reportUnnecessaryIsInstance = "information"
+reportUnnecessaryCast = "warning"
+reportUnnecessaryComparison = "warning"
+reportUnnecessaryContains = "warning"
+reportUnusedCallResult = "warning"
+reportUnusedExpression = "warning"
+reportMatchNotExhaustive = "warning"
+reportShadowedImports = "warning"
+reportUntypedFunctionDecorator = "warning"
+reportUntypedClassDecorator = "warning"
+reportUntypedBaseClass = "error"
+reportUntypedNamedTuple = "warning"
+reportUnnecessaryTypeIgnoreComment = "information"
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".venv",
+    "dist",
+    "build",
+    "*cache",
+    "**/__pycache__",
+]
+src = [
+    "src",
+]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+[lint]
+# Settings for Ruff linter (invoked with `uv run ruff check`).
+# Start by including _all_ Ruff lint rules, then ignore selected rules as needed
+# https://docs.astral.sh/ruff/rules/
+select = [
+    "ALL",
+]
+ignore = [
+    # Ruff lint rules temporarily ignored, but which should be reactivated and resolved in the future.
+    "D", # Missing docstrings   <- @TODO: reactivate and resolve docstring issues  @CLAROS, 2024-09-27
+
+    # Ruff lint rules considered as too strict and hence ignored
+    "FIX002",  # Line contains TODO, consider resolving the issue
+    "TD003",   # Missing issue link on the line following a TODO
+    "S101",    # Use of assert detected
+    "RET504",  # Unnecessary assignment to `result` before `return` statement
+    "EM101",   # Exception must not use a string literal, assign to variable first
+    "EM102",   # Exception must not use an f-string literal, assign to variable first
+    "TRY003",  # Avoid specifying long messages outside the exception class
+    "PLR1711", # Useless `return` statement at end of function
+    "G00",     # Logging statement uses string formatting ('G00' covers all rules flagging string formatting in logging, e.g. G001, G002, etc.)
+    "S311",    # Standard pseudo-random generators are not suitable for cryptographic purposes
+    "PLW0603", # Using the global statement to update {name} is discouraged
+    "PYI041",  # Use `float` instead of `int | float`
+
+    # Ruff lint rules known to be in conflict with Ruff formatter.
+    # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "W191",   # Tab-indentation (in conflict with Ruff formatter)
+    "E111",   # Indentation with invalid multiple (in conflict with Ruff formatter)
+    "E114",   # Indentation with invalid multiple comment (in conflict with Ruff formatter)
+    "E117",   # Over-indented (in conflict with Ruff formatter)
+    "D206",   # Indent with spaces (in conflict with Ruff formatter)
+    "D300",   # Triple single quotes (in conflict with Ruff formatter)
+    "Q000",   # Bad quotes in inline string (in conflict with Ruff formatter)
+    "Q001",   # Bad quotes in multi-line string (in conflict with Ruff formatter)
+    "Q002",   # Bad quotes in DocString (in conflict with Ruff formatter)
+    "Q003",   # Avoidable escaped quote (in conflict with Ruff formatter)
+    "COM812", # Missing trailing comma (in conflict with Ruff formatter)
+    "COM819", # Prohibited trailing comma (in conflict with Ruff formatter)
+    "ISC001", # Single-line implicit string concatenation (in conflict with Ruff formatter)
+    "ISC002", # Multi-line implicit string concatenation (in conflict with Ruff formatter)
+]

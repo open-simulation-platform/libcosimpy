@@ -4,4 +4,3 @@ failure = -1
 
 # Constants
 SLAVE_NAME_MAX_SIZE = 1024
-
