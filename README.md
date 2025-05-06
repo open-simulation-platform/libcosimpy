@@ -217,12 +217,12 @@ Alternatively, ECCO algorithm can also be created via system structure file:
         <!-- Annotate variable connection as power bond via `powerBond` attribute. Specify
              causality of the variable (input or output) -->
         <VariableConnection powerBond="wheelchassis">
-            <Variable simulator="chassis" name="velocity" causality="input"/>
-            <Variable simulator="wheel" name="in_vel" causality="output"/>
+            <Variable simulator="chassis" name="velocity" causality="output"/>
+            <Variable simulator="wheel" name="in_vel" causality="input"/>
         </VariableConnection>
         <VariableConnection powerBond="wheelchassis">
-            <Variable simulator="wheel" name="out_spring_damper_f" causality="input"/>
-            <Variable simulator="chassis" name="force" causality="output"/>
+            <Variable simulator="wheel" name="out_spring_damper_f" causality="output"/>
+            <Variable simulator="chassis" name="force" causality="input"/>
         </VariableConnection>
     </Connections>
     <!-- Specify ecco algorithm parameters -->
