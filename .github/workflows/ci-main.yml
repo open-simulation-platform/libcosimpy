@@ -27,8 +27,8 @@ jobs:
       - name: Run pyright
         run: uv run --no-project pyright
 
-  build_and_test:
-    name: Build and test
+  build_wheels_and_test:
+    name: Build/Test
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -69,7 +69,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_source:
-    name: Build source
+    name: Package source
     runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v3
@@ -92,7 +92,7 @@ jobs:
    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
    needs:
      - code_quality
-     - build_and_test
+     - build_wheels_and_test
      - build_source
    runs-on: ubuntu-latest
    steps:
