@@ -28,7 +28,7 @@ jobs:
         run: uv run --no-project pyright
 
   build_wheels_and_test:
-    name: Build/Test
+    name: Build / Test
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
