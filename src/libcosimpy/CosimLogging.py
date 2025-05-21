@@ -1,6 +1,5 @@
 from ctypes import c_int
-from ._internal import wrap_function
-from . import CosimLibrary
+from ._internal import wrap_function, libcosimc
 
 from enum import Enum
 
@@ -25,7 +24,7 @@ def log_output_level(log_level: CosimLogLevel):
     :param CosimLogLevel log_level:
     """
     log_output_level_set = wrap_function(
-        lib=CosimLibrary.lib,
+        lib=libcosimc(),
         funcname="cosim_log_set_output_level",
         argtypes=[c_int],
         restype=None,

@@ -11,8 +11,7 @@ from ctypes import (
 from dataclasses import dataclass
 from typing import Optional
 
-from . import CosimLibrary
-from ._internal import wrap_function, get_last_error_message
+from ._internal import wrap_function, get_last_error_message, libcosimc
 
 if typing.TYPE_CHECKING:
     from ctypes import _Pointer  # pyright: ignore[reportPrivateUsage]
@@ -69,7 +68,7 @@ class CosimAlgorithm(Structure):
         )
 
         self.__ecco_add_power_bond = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_ecco_add_power_bond",
             argtypes=[POINTER(CosimAlgorithm), c_int, c_uint32, c_uint32, c_int, c_uint32, c_uint32],
             restype=c_int,
@@ -78,7 +77,7 @@ class CosimAlgorithm(Structure):
     @classmethod
     def create_ecco_algorithm(cls, param: EccoParams) -> CosimAlgorithm:
         ecco_algorithm_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_ecco_algorithm_create",
             argtypes=[
                 c_double,
@@ -156,7 +155,7 @@ class CosimAlgorithm(Structure):
         # Release object in C when object is removed (if pointer exists)
         if self.__ptr is not None:
             algorithm_destroy = wrap_function(
-                lib=CosimLibrary.lib,
+                lib=libcosimc(),
                 funcname="cosim_algorithm_destroy",
                 argtypes=[POINTER(CosimAlgorithm)],
                 restype=c_int,
