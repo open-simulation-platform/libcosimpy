@@ -1,6 +1,5 @@
 from ctypes import c_char, c_char_p, POINTER, c_int, Structure, c_uint32
-from ._internal import wrap_function
-from . import CosimLibrary
+from ._internal import wrap_function, libcosimc
 from . import CosimConstants
 from . import CosimEnums
 
@@ -46,7 +45,7 @@ class CosimLocalSlave(Structure):
 
     def __init__(self, fmu_path: str, instance_name: str):
         local_slave_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_local_slave_create",
             argtypes=[c_char_p, c_char_p],
             restype=POINTER(CosimLocalSlave),
@@ -66,7 +65,7 @@ class CosimLocalSlave(Structure):
         Releases C objects when CosimObserver is deleted in python
         """
         local_slave_destroy = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_local_slave_destroy",
             argtypes=[POINTER(CosimLocalSlave)],
             restype=c_int,
