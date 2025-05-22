@@ -21,7 +21,7 @@ class WheelHook(BuildHookInterface):
             frame = frame_info.frame
             module = inspect.getmodule(frame)
             if module and module.__name__.startswith("hatchling.build") and "config_settings" in frame.f_locals:
-                config_settings = frame.f_locals["config_settings"]
+                config_settings = frame.f_locals["config_settings"] or {}
 
         package_list = config_settings.get("CONAN_BUILD")
         if package_list:
