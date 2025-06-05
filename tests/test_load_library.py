@@ -1,5 +1,5 @@
-import libcosimpy.CosimLibrary
+from libcosimpy._internal import libcosimc
 
 
 def test_load_libray():
-    assert libcosimpy.CosimLibrary is not None
+    assert libcosimc() is not None
