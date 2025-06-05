@@ -14,7 +14,7 @@ from ctypes import (
 from typing import Optional
 
 from . import CosimConstants, CosimEnums, CosimManipulator, CosimObserver, CosimSlave
-from ._internal import wrap_function, libcosimc
+from ._internal import wrap_function, libcosimc, get_last_error_message
 from .CosimAlgorithm import CosimAlgorithm
 
 if typing.TYPE_CHECKING:
@@ -272,7 +272,7 @@ class CosimExecution(Structure):
 
         execution_ptr = osp_execution_create(encoded_osp_path, False, 0)
 
-        assert execution_ptr, "Unable to create execution from path. Please check if path is correct."
+        assert execution_ptr, f"Unable to create execution from path: {get_last_error_message()}"
 
         return cls(cls.__create_key, execution_ptr)
 
