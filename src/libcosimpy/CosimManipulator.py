@@ -11,9 +11,9 @@ from ctypes import (
 )
 from typing import TYPE_CHECKING, Optional, Any, Sequence
 
-from . import CosimConstants, CosimLibrary
+from . import CosimConstants
 from .CosimEnums import CosimVariableType
-from ._internal import wrap_function
+from ._internal import wrap_function, libcosimc
 
 if TYPE_CHECKING:
     from ctypes import _Pointer  # pyright: ignore[reportPrivateUsage]
@@ -49,7 +49,7 @@ class CosimManipulator(Structure):
         # Store the pointer used by the C library
         self.__ptr = manipulator_ptr
         self.__abort = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_scenario_abort",
             argtypes=[POINTER(CosimManipulator)],
             restype=c_int,
@@ -63,7 +63,7 @@ class CosimManipulator(Structure):
         :return: CosimManipulator object from constructor
         """
         override_manipulator_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_override_manipulator_create",
             argtypes=[],
             restype=POINTER(CosimManipulator),
@@ -79,7 +79,7 @@ class CosimManipulator(Structure):
         :return CosimManipulator object from constructor
         """
         scenario_manager_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_scenario_manager_create",
             argtypes=[],
             restype=POINTER(CosimManipulator),
@@ -126,7 +126,7 @@ class CosimManipulator(Structure):
         value_array = (c_type * variable_count)(*values)
 
         slave_values = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname=funcname,
             argtypes=[
                 POINTER(CosimManipulator),
@@ -220,7 +220,7 @@ class CosimManipulator(Structure):
         variable_array = (c_uint32 * variable_count)(*variable_references)
 
         slave_reset = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_manipulator_slave_reset",
             argtypes=[
                 POINTER(CosimManipulator),
@@ -256,7 +256,7 @@ class CosimManipulator(Structure):
         """
         if self.__ptr is not None:
             manipulator_destroy = wrap_function(
-                lib=CosimLibrary.lib,
+                lib=libcosimc(),
                 funcname="cosim_manipulator_destroy",
                 argtypes=[POINTER(CosimManipulator)],
                 restype=c_int64,
