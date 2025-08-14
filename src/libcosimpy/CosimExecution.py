@@ -60,7 +60,7 @@ class CosimExecution(Structure):
             lib=CosimLibrary.lib,
             funcname="cosim_execution_step",
             argtypes=[POINTER(CosimExecution), c_int64],
-            restype=None,
+            restype=c_int,
         )
         self.__add_local_slave = wrap_function(
             lib=CosimLibrary.lib,
