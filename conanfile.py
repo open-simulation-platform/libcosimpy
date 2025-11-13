@@ -7,8 +7,11 @@ class LibCosimpyConanDependency(ConanFile):
     requires = "libcosimc/0.11.0@osp/stable"
     default_options = {
         "libcosim/*:proxyfmu": True,
-        "libcosimc/*:shared": False,
     }
+
+    def configure(self):
+        self.options["*"].shared = False
+        self.options["libcosimc/*"].shared = True
 
     def generate(self):
         for dep in self.dependencies.values():
