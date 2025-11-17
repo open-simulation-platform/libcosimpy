@@ -62,7 +62,7 @@ jobs:
            pip install twine
            twine check --strict ./wheelhouse/*
       - uses: actions/upload-artifact@v4
-        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         name: Upload artifact (wheels)
         with:
           name: libcosimpy-${{ github.ref_name }}-${{ runner.os }}-${{ matrix.python-version }}-wheel
@@ -89,7 +89,7 @@ jobs:
           path: ./dist/*.tar.gz
 
   publish:
-   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
    needs:
      - code_quality
      - build_wheels_and_test
