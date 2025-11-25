@@ -34,7 +34,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ 'windows-latest', 'ubuntu-latest' ]
-        python-version: [ 'cp310', 'cp311', 'cp312', 'cp313', 'cp314' ]
+        python-version: [ 'cp311', 'cp312', 'cp313', 'cp314' ]
     timeout-minutes: 35
     env:
       CONAN_REVISIONS_ENABLED: 1
@@ -49,7 +49,7 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.23.3
+        uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: "${{ matrix.python-version }}-win_amd64 ${{ matrix.python-version }}-manylinux_x86_64"
           CIBW_BUILD_FRONTEND: build[uv]
