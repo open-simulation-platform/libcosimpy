@@ -95,6 +95,7 @@ jobs:
      - build_wheels_and_test
      - build_source
    runs-on: ubuntu-latest
+   environment: release
    steps:
      - uses: actions/download-artifact@v4
        with:
