@@ -13,9 +13,8 @@ from ctypes import (
 )
 from typing import Optional, TYPE_CHECKING, Any
 
-from . import CosimLibrary
 from .CosimEnums import CosimVariableType
-from ._internal import wrap_function
+from ._internal import wrap_function, libcosimc
 from . import CosimConstants
 
 
@@ -53,19 +52,19 @@ class CosimObserver(Structure):
         # Store the pointer used by the C library
         self.__ptr = observer_ptr
         self.__step_numbers = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_observer_get_step_numbers",
             argtypes=[POINTER(CosimObserver), c_longlong, c_longlong, c_uint32],
             restype=c_int,
         )
         self.__start_observing = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_observer_start_observing",
             argtypes=[POINTER(CosimObserver), c_int, c_int, c_uint32],
             restype=c_int,
         )
         self.__stop_observing = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_observer_stop_observing",
             argtypes=[POINTER(CosimObserver), c_int, c_int, c_uint32],
             restype=c_int,
@@ -79,7 +78,7 @@ class CosimObserver(Structure):
         :return: CosimObserver object from constructor
         """
         last_value_observer_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_last_value_observer_create",
             argtypes=[],
             restype=POINTER(CosimObserver),
@@ -96,7 +95,7 @@ class CosimObserver(Structure):
         :return: CosimObserver object from constructor
         """
         file_observer_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_file_observer_create",
             argtypes=[c_char_p],
             restype=POINTER(CosimObserver),
@@ -113,7 +112,7 @@ class CosimObserver(Structure):
         :param str cfg_path: Directory of the LogConfig.xml file
         :return: CosimObserver object from constructor
         
-        file_observer_create = wrap_function(lib=CosimLibrary.lib, funcname='cosim_file_observer_create_from_cfg',
+        file_observer_create = wrap_function(lib=libcosimc(), funcname='cosim_file_observer_create_from_cfg',
                                                      argtypes=[c_char_p, c_char_p],
                                                      restype=POINTER(CosimObserver))
 
@@ -130,7 +129,7 @@ class CosimObserver(Structure):
         """
         if buffer_size is None:
             time_series_create = wrap_function(
-                lib=CosimLibrary.lib,
+                lib=libcosimc(),
                 funcname="cosim_time_series_observer_create",
                 argtypes=[],
                 restype=POINTER(CosimObserver),
@@ -139,7 +138,7 @@ class CosimObserver(Structure):
             return cls(cls.__create_key, observer_ptr)
         else:
             buffered_time_series_create = wrap_function(
-                lib=CosimLibrary.lib,
+                lib=libcosimc(),
                 funcname="cosim_buffered_time_series_observer_create",
                 argtypes=[c_uint64],
                 restype=POINTER(CosimObserver),
@@ -192,7 +191,7 @@ class CosimObserver(Structure):
         samples_array = (c_type * sample_count)()
 
         real_samples = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname=funcname,
             argtypes=[
                 POINTER(CosimObserver),
@@ -289,7 +288,7 @@ class CosimObserver(Structure):
         value_array = (c_type * variable_count)()
 
         real_values = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname=funcname,
             argtypes=[
                 POINTER(CosimObserver),
@@ -383,7 +382,7 @@ class CosimObserver(Structure):
         """
         if self.__ptr is not None:
             observer_destroy = wrap_function(
-                lib=CosimLibrary.lib,
+                lib=libcosimc(),
                 funcname="cosim_observer_destroy",
                 argtypes=[POINTER(CosimObserver)],
                 restype=c_int,

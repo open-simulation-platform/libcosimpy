@@ -13,8 +13,8 @@ from ctypes import (
 )
 from typing import Optional
 
-from . import CosimConstants, CosimEnums, CosimLibrary, CosimManipulator, CosimObserver, CosimSlave
-from ._internal import wrap_function
+from . import CosimConstants, CosimEnums, CosimManipulator, CosimObserver, CosimSlave
+from ._internal import wrap_function, libcosimc, get_last_error_message
 from .CosimAlgorithm import CosimAlgorithm
 
 if typing.TYPE_CHECKING:
@@ -57,55 +57,55 @@ class CosimExecution(Structure):
         self.__execution_status_ptr = pointer(self.execution_status)
 
         self.__multiple_steps = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_step",
             argtypes=[POINTER(CosimExecution), c_int64],
             restype=c_int,
         )
         self.__add_local_slave = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_add_slave",
             argtypes=[POINTER(CosimExecution), POINTER(CosimSlave.CosimLocalSlave)],
             restype=c_int,
         )
         self.__simulate_until = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_simulate_until",
             argtypes=[POINTER(CosimExecution), c_int64],
             restype=c_int,
         )
         self.__stop = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_stop",
             argtypes=[POINTER(CosimExecution)],
             restype=c_int,
         )
         self.__enable_real_time_simulation = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_enable_real_time_simulation",
             argtypes=[POINTER(CosimExecution)],
             restype=c_int,
         )
         self.__disable_real_time_simulation = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_disable_real_time_simulation",
             argtypes=[POINTER(CosimExecution)],
             restype=c_int,
         )
         self.__real_time_factor_target = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_set_real_time_factor_target",
             argtypes=[POINTER(CosimExecution), c_double],
             restype=c_int,
         )
         self.__steps_to_monitor = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_set_steps_to_monitor",
             argtypes=[POINTER(CosimExecution), c_int],
             restype=c_int,
         )
         self.__add_manipulator = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_add_manipulator",
             argtypes=[
                 POINTER(CosimExecution),
@@ -114,31 +114,31 @@ class CosimExecution(Structure):
             restype=c_int,
         )
         self.__add_observer = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_add_observer",
             argtypes=[POINTER(CosimExecution), POINTER(CosimObserver.CosimObserver)],
             restype=c_int,
         )
         self.__status = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_get_status",
             argtypes=[POINTER(CosimExecution), POINTER(CosimExecutionStatus)],
             restype=c_int,
         )
         self.__slave_num_variables = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_slave_get_num_variables",
             argtypes=[POINTER(CosimExecution), c_int],
             restype=c_int,
         )
         self.__num_modified_variables = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_get_num_modified_variables",
             argtypes=[POINTER(CosimExecution)],
             restype=c_int,
         )
         self.__load_scenario = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_load_scenario",
             argtypes=[
                 POINTER(CosimExecution),
@@ -148,55 +148,55 @@ class CosimExecution(Structure):
             restype=c_int,
         )
         self.__real_initial = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_set_real_initial_value",
             argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_double],
             restype=c_int,
         )
         self.__integer_initial = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_set_integer_initial_value",
             argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_int],
             restype=c_int,
         )
 
         self.__boolean_initial = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_set_boolean_initial_value",
             argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_bool],
             restype=c_int,
         )
 
         self.__string_initial = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_set_string_initial_value",
             argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_char_p],
             restype=c_int,
         )
 
         self.__connect_real_variables = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_connect_real_variables",
             argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_int, c_uint32],
             restype=c_int,
         )
 
         self.__connect_int_variables = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_connect_integer_variables",
             argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_int, c_uint32],
             restype=c_int,
         )
 
         self.__connect_string_variables = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_connect_string_variables",
             argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_int, c_uint32],
             restype=c_int,
         )
 
         self.__connect_boolean_variables = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_connect_boolean_variables",
             argtypes=[POINTER(CosimExecution), c_int, c_uint32, c_int, c_uint32],
             restype=c_int,
@@ -210,7 +210,7 @@ class CosimExecution(Structure):
         :return: CosimExecution object
         """
         execution_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_create_with_algorithm",
             argtypes=[c_int64, POINTER(CosimAlgorithm)],
             restype=POINTER(CosimExecution),
@@ -243,7 +243,7 @@ class CosimExecution(Structure):
         assert step_size > 0, "Step size must be a positive and non-zero integer"
 
         execution_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_create",
             argtypes=[c_int64, c_int64],
             restype=POINTER(CosimExecution),
@@ -260,7 +260,7 @@ class CosimExecution(Structure):
         :return: CosimExecution object
         """
         osp_execution_create = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_osp_config_execution_create",
             argtypes=[c_char_p, c_bool, c_int64],
             restype=POINTER(CosimExecution),
@@ -272,7 +272,7 @@ class CosimExecution(Structure):
 
         execution_ptr = osp_execution_create(encoded_osp_path, False, 0)
 
-        assert execution_ptr, "Unable to create execution from path. Please check if path is correct."
+        assert execution_ptr, f"Unable to create execution from path: {get_last_error_message()}"
 
         return cls(cls.__create_key, execution_ptr)
 
@@ -288,7 +288,7 @@ class CosimExecution(Structure):
         if step_size is None:
             # Create simulation without defined step size
             ssp_execution_create = wrap_function(
-                lib=CosimLibrary.lib,
+                lib=libcosimc(),
                 funcname="cosim_ssp_execution_create",
                 argtypes=[c_char_p, c_bool, c_int64],
                 restype=POINTER(CosimExecution),
@@ -309,7 +309,7 @@ class CosimExecution(Structure):
 
             # Create simulation with defined step size
             ssp_fixed_step_execution_create = wrap_function(
-                lib=CosimLibrary.lib,
+                lib=libcosimc(),
                 funcname="cosim_ssp_fixed_step_execution_create",
                 argtypes=[c_char_p, c_bool, c_int64, c_int64],
                 restype=POINTER(CosimExecution),
@@ -327,7 +327,7 @@ class CosimExecution(Structure):
         :return: int Number of currently connected slaves
         """
         execution_get_num_slaves = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_get_num_slaves",
             argtypes=[POINTER(CosimExecution)],
             restype=c_int,
@@ -341,7 +341,7 @@ class CosimExecution(Structure):
         :return: bool Successful start of execution
         """
         execution_start = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_start",
             argtypes=[POINTER(CosimExecution)],
             restype=c_int,
@@ -468,7 +468,7 @@ class CosimExecution(Structure):
         slave_count = self.num_slaves()
         slave_infos_list = (CosimSlave.CosimSlaveInfo * slave_count)()
         slave_infos = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_execution_get_slave_infos",
             argtypes=[
                 POINTER(CosimExecution),
@@ -521,7 +521,7 @@ class CosimExecution(Structure):
         slave_variables_count = self.num_slave_variables(slave_index)
         slave_variables_list = (CosimSlave.CosimSlaveVariableDescription * slave_variables_count)()
         slave_variables = wrap_function(
-            lib=CosimLibrary.lib,
+            lib=libcosimc(),
             funcname="cosim_slave_get_variables",
             argtypes=[
                 POINTER(CosimExecution),
@@ -675,7 +675,7 @@ class CosimExecution(Structure):
         # Release object in C when object is removed (if pointer exists)
         if self.__ptr is not None:
             execution_destroy = wrap_function(
-                lib=CosimLibrary.lib,
+                lib=libcosimc(),
                 funcname="cosim_execution_destroy",
                 argtypes=[POINTER(CosimExecution)],
                 restype=c_int,

@@ -21,7 +21,7 @@ class WheelHook(BuildHookInterface):
             frame = frame_info.frame
             module = inspect.getmodule(frame)
             if module and module.__name__.startswith("hatchling.build") and "config_settings" in frame.f_locals:
-                config_settings = frame.f_locals["config_settings"]
+                config_settings = frame.f_locals["config_settings"] or {}
 
         package_list = config_settings.get("CONAN_BUILD")
         if package_list:
@@ -29,9 +29,9 @@ class WheelHook(BuildHookInterface):
         else:
             build_packages = "-b missing"
 
-        assert os.system(f"conan install . -u {build_packages} -of build --format json --out-file graph.json") == 0, (
-            "Conan install failed"
-        )
+        assert (
+            os.system(f"conan install . -u {build_packages} -of build --format json -b b2/* --out-file graph.json") == 0
+        ), "Conan install failed"
 
         if "CONAN_UPLOAD_OSP" in os.environ:
             print("Uploading packages..")
