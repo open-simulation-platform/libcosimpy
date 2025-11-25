@@ -13,7 +13,7 @@ maintainers = [
 ]
 description = "Python wrapper for the libcosim library"
 readme = "README.md"
-requires-python = ">=3.10, <3.14"
+requires-python = ">=3.10, <3.15"
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
