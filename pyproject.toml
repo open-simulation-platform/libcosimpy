@@ -62,7 +62,7 @@ test-command = "uv run --with pytest pytest {package}"
 [tool.cibuildwheel.linux]
 before-all = [
     "yum install -y libatomic",
-    "yum install -y perl-IPC-Cmd perl-Digest-SHA",
+    "yum install -y perl-IPC-Cmd perl-Digest-SHA perl-Time-Piece",
 ]
 manylinux-x86_64-image = "manylinux_2_28"
 
