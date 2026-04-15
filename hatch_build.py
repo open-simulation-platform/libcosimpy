@@ -30,7 +30,7 @@ class WheelHook(BuildHookInterface):
             build_packages = "-b missing"
 
         assert (
-            os.system(f"conan install . -u {build_packages} -of build --format json -b b2/* --out-file graph.json") == 0
+            os.system(f"conan install . -u {build_packages} -of build --format json -b b2/* -b m4/* --out-file graph.json") == 0
         ), "Conan install failed"
 
         if "CONAN_UPLOAD_OSP" in os.environ:
