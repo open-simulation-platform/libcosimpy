@@ -30,8 +30,8 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-    "conan~=2.15.1",
-    "ruff~=0.11.7",
+    "conan>=2.27.0",
+    "ruff>=0.15.0",
     "pyright>=1.1.400",
     "pytest>=8.3.5",
 ]
@@ -45,7 +45,7 @@ exclude = ["tests", ".github"]
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 dependencies = [
-    "conan~=2.15.1",
+    "conan>=2.27.0",
     "hatchling~=1.13",
     "cmake>=3.10,<4.0",
     "patchelf>=0.17.2; platform_system == 'Linux'"
