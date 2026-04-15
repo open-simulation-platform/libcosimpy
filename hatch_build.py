@@ -48,4 +48,4 @@ class WheelHook(BuildHookInterface):
             subprocess.run(["conan", "upload", "--confirm", "--list=pkglist.json", "--remote", "osp"], check=True)
 
         if system_os == "Linux":
-            subprocess.run(["patchelf", "--set-rpath", "$ORIGIN", "build/libcosimc/*"], shell=True, check=True)
+            subprocess.run(["patchelf", "--set-rpath", "'$ORIGIN'", "build/libcosimc/*"], shell=True, check=True)
