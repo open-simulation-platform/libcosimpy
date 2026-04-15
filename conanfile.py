@@ -9,6 +9,10 @@ class LibCosimpyConanDependency(ConanFile):
         "libcosim/*:proxyfmu": True,
     }
 
+    def configure(self):
+        self.options["*"].shared = False
+        self.options["libcosimc/*"].shared = True
+
     def generate(self):
         for dep in self.dependencies.values():
             for dep_bin_dir in dep.cpp_info.bindirs:
