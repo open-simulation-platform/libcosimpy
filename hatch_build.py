@@ -1,4 +1,3 @@
-
 from typing import Any
 import inspect
 import os
@@ -16,9 +15,10 @@ class WheelHook(BuildHookInterface):
         build_data["infer_tag"] = True
         build_data["pure_python"] = False
 
-        subprocess.run([
-            "conan", "remote", "add", "osp", "https://osp.jfrog.io/artifactory/api/conan/conan-local", "--force"
-        ], check=True)
+        subprocess.run(
+            ["conan", "remote", "add", "osp", "https://osp.jfrog.io/artifactory/api/conan/conan-local", "--force"],
+            check=True,
+        )
         subprocess.run(["conan", "profile", "detect", "--force"], check=True)
 
         for frame_info in inspect.stack():
@@ -33,19 +33,19 @@ class WheelHook(BuildHookInterface):
         else:
             build_packages = "-b missing"
 
-        install_cmd = f"conan install . -u {build_packages} -of build --format json -b b2/* -b m4/* --out-file graph.json"
+        install_cmd = (
+            f"conan install . -u {build_packages} -of build --format json -b b2/* -b m4/* --out-file graph.json"
+        )
         result = subprocess.run(install_cmd, shell=True)
         assert result.returncode == 0, "Conan install failed"
 
         if "CONAN_UPLOAD_OSP" in os.environ:
             print("Uploading packages..")
             with open("pkglist.json", "w") as pkglist_file:
-                subprocess.run([
-                    "conan", "list", "--graph=graph.json", "--format=json"
-                ], check=True, stdout=pkglist_file)
-            subprocess.run([
-                "conan", "upload", "--confirm", "--list=pkglist.json", "--remote", "osp"
-            ], check=True)
+                subprocess.run(
+                    ["conan", "list", "--graph=graph.json", "--format=json"], check=True, stdout=pkglist_file
+                )
+            subprocess.run(["conan", "upload", "--confirm", "--list=pkglist.json", "--remote", "osp"], check=True)
 
         if system_os == "Linux":
             subprocess.run(["patchelf", "--set-rpath", "$ORIGIN", "build/libcosimc/*"], shell=True, check=True)
