@@ -3,6 +3,8 @@ import inspect
 import os
 import platform
 import subprocess
+import shlex
+import glob
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
@@ -33,10 +35,12 @@ class WheelHook(BuildHookInterface):
         else:
             build_packages = "-b missing"
 
-        install_cmd = (
+        install_cmd_str = (
             f"conan install . -u {build_packages} -of build --format json -b b2/* -b m4/* --out-file graph.json"
         )
-        result = subprocess.run(install_cmd, shell=True)
+
+        install_args = shlex.split(install_cmd_str)
+        result = subprocess.run(install_args)
         assert result.returncode == 0, "Conan install failed"
 
         if "CONAN_UPLOAD_OSP" in os.environ:
@@ -48,4 +52,5 @@ class WheelHook(BuildHookInterface):
             subprocess.run(["conan", "upload", "--confirm", "--list=pkglist.json", "--remote", "osp"], check=True)
 
         if system_os == "Linux":
-            subprocess.run(["patchelf", "--set-rpath", "$ORIGIN", "build/libcosimc/*"], check=True)
+            for libfile in glob.glob("build/libcosimc/*"):
+                subprocess.run(["patchelf", "--set-rpath", "$ORIGIN", libfile], check=True)
