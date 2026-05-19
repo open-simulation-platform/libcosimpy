@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
     inputs:
       conan_build:
-        description: 'Conan build params'
+        description: 'Conan build params, separated by comma (,)'
         required: false
         type: string
-        default: "-b  missing"
+        default: "missing"
 
 jobs:
   code_quality:

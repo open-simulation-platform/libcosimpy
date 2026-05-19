@@ -46,8 +46,8 @@ exclude = ["tests", ".github"]
 [tool.hatch.build.targets.wheel.hooks.custom]
 dependencies = [
     "conan>=2.27.0",
-    "hatchling~=1.13",
-    "cmake>=3.10,<4.0",
+    "hatchling>=1.29.0",
+    "cmake>=4.0",
     "patchelf>=0.17.2; platform_system == 'Linux'"
 ]
 
