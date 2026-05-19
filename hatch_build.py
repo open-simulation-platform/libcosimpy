@@ -35,9 +35,7 @@ class WheelHook(BuildHookInterface):
         else:
             build_packages = "-b missing"
 
-        install_cmd_str = (
-            f"conan install . -u {build_packages} -of build --format json --out-file graph.json"
-        )
+        install_cmd_str = f"conan install . -u {build_packages} -of build --format json --out-file graph.json"
 
         install_args = shlex.split(install_cmd_str)
         result = subprocess.run(install_args)
