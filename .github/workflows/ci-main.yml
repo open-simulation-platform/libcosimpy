@@ -15,7 +15,7 @@ jobs:
   code_quality:
     name: Code Quality
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
@@ -43,7 +43,7 @@ jobs:
       matrix:
         platform: [ 'windows-latest', 'ubuntu-latest' ]
         python-version: [ 'cp311', 'cp312', 'cp313', 'cp314' ]
-    timeout-minutes: 35
+    timeout-minutes: 45
     env:
       CONAN_REVISIONS_ENABLED: 1
     steps:
