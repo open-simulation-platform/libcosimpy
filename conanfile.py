@@ -4,7 +4,7 @@ from conan.tools.files import copy
 
 class LibCosimpyConanDependency(ConanFile):
     name = "libcosimpy-recipe"
-    requires = "libcosimc/0.11.0@osp/stable"
+    requires = "libcosimc/0.11.2@osp/stable"
     default_options = {
         "libcosim/*:proxyfmu": True,
     }
