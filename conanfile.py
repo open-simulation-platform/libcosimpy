@@ -10,7 +10,7 @@ class LibCosimpyConanDependency(ConanFile):
 
     def requirements(self):
         self.requires("libcosimc/0.11.2@osp/stable")
-        # self.requires("cli11/[~2.6.0]", override=True)
+        self.requires("cli11/[~2.6.0]", override=True)
 
     def configure(self):
         self.options["*"].shared = False

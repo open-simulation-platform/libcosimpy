@@ -122,7 +122,7 @@ src = [
     "src",
 ]
 line-length = 120
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 [lint]
