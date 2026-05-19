@@ -98,7 +98,7 @@ jobs:
           path: ./dist/*.tar.gz
 
   publish:
-   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
    needs:
      - code_quality
      - build_wheels_and_test
