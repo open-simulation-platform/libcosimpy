@@ -46,8 +46,7 @@ exclude = ["tests", ".github"]
 [tool.hatch.build.targets.wheel.hooks.custom]
 dependencies = [
     "conan>=2.27.0",
-    "hatchling~=1.13",
-    "cmake>=3.10,<4.0",
+    "hatchling>=1.29.0",
     "patchelf>=0.17.2; platform_system == 'Linux'"
 ]
 
@@ -61,7 +60,7 @@ test-command = "uv run --with pytest pytest {package}"
 
 [tool.cibuildwheel.linux]
 before-all = [
-    "yum install -y libatomic",
+    "yum install -y libatomic doxygen",
     "yum install -y perl-IPC-Cmd perl-Digest-SHA perl-Time-Piece",
 ]
 manylinux-x86_64-image = "manylinux_2_28"
@@ -123,7 +122,7 @@ src = [
     "src",
 ]
 line-length = 120
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 [lint]

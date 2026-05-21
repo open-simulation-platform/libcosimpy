@@ -4,10 +4,13 @@ from conan.tools.files import copy
 
 class LibCosimpyConanDependency(ConanFile):
     name = "libcosimpy-recipe"
-    requires = "libcosimc/0.11.0@osp/stable"
     default_options = {
         "libcosim/*:proxyfmu": True,
     }
+
+    def requirements(self):
+        self.requires("libcosimc/0.11.2@osp/stable")
+        self.requires("cli11/[~2.6.0]", override=True)
 
     def configure(self):
         self.options["*"].shared = False
