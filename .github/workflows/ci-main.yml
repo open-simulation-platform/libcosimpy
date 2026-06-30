@@ -56,6 +56,11 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
+      - name: Setup MSBuild 2022
+        uses: microsoft/setup-msbuild@v3
+        with:
+          vs-version: '2022'
+        if: runner.os == 'Windows'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.1
         env:
