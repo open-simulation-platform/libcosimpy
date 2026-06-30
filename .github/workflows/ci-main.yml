@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ 'windows-latest', 'ubuntu-latest' ]
+        platform: [ 'windows-2022', 'ubuntu-latest' ] # windows-2022 because fmilibrary uses older cmake that does not support msbuild 18
         python-version: [ 'cp311', 'cp312', 'cp313', 'cp314' ]
     timeout-minutes: 45
     env:
@@ -56,6 +56,10 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
+      - uses: ssciwr/doxygen-install@v2 # Currently libcosimc build fails without doxygen installed
+        with:
+          version: "1.16.1"
+        if: runner.os == 'Windows'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.1
         env:
