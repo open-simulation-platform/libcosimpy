@@ -56,6 +56,10 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
+      - uses: ssciwr/doxygen-install@v2 # Currently libcosimc build fails without doxygen installed
+        with:
+          version: "1.16.1"
+        if: runner.os == 'Windows'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.1
         env:
